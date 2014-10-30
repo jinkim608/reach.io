@@ -37,6 +37,7 @@ public class GlobalTouchService extends Service implements OnTouchListener {
 
     private int selectorSize;
     private int anchorSize;
+    private int thumbSize;
     private float movementRate;
     private int anchorOuterMargin;
 
@@ -60,6 +61,7 @@ public class GlobalTouchService extends Service implements OnTouchListener {
         /* initialize anchor and selector sizes and locations */
         anchorSize = app.anchorSize;
         selectorSize = app.selectorSize;
+        thumbSize = app.thumbSize;
         movementRate = app.movementRate;
         anchorOuterMargin = app.anchorOuterMargin;
 
@@ -157,18 +159,16 @@ public class GlobalTouchService extends Service implements OnTouchListener {
 //            Log.d("####", "onTouch -- dx: " + dx + ",\t dy: " + dy);
 //            Log.d("####", "x: " + event.getX() + ",\t y: " + event.getY());
         }
-
-        updateSelectorLoc();
+        updateIndicatorLocations();
 
         return true;
     }
 
-
-    private void updateSelectorLoc() {
+    private void updateIndicatorLocations() {
 
         /* update the selector point according to the current touch location */
         WindowManager.LayoutParams mParams = new WindowManager.LayoutParams(
-                selectorSize, selectorSize, selectorX, selectorY,
+                selectorSize, selectorSize, selectorX, selectorY + (selectorSize / 2),
                 WindowManager.LayoutParams.TYPE_PHONE, // Type Ohone, These are non-application windows providing user interaction with the phone (in particular incoming calls).
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, // this window won't ever get key input focus
                 PixelFormat.TRANSLUCENT);
@@ -178,7 +178,7 @@ public class GlobalTouchService extends Service implements OnTouchListener {
 
         /* update thumb location indicator */
         WindowManager.LayoutParams tParams = new WindowManager.LayoutParams(
-                app.thumbSize, app.thumbSize, thumbX, thumbY,
+                thumbSize, thumbSize, thumbX - (thumbSize / 2), thumbY - thumbSize,
                 WindowManager.LayoutParams.TYPE_PHONE, // Type Ohone, These are non-application windows providing user interaction with the phone (in particular incoming calls).
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, // this window won't ever get key input focus
                 PixelFormat.TRANSLUCENT);
