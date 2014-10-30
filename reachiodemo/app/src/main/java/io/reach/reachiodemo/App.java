@@ -13,15 +13,19 @@ public class App extends Application {
     public int anchorSize;
     public int anchorOuterMargin;
     public int selectorSize;
+    public int thumbSize;
 
     public float movementRate;
 
     private App() {
 
         /* dimension variables */
-        anchorSize = 50;
+        anchorSize = 155;
         anchorOuterMargin = 20;
-        selectorSize = 40;
+
+        selectorSize = 155;
+
+        thumbSize = 155;
 
         movementRate = 2.0f;
 
