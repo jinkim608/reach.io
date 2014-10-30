@@ -19,12 +19,11 @@ public class App extends Application {
     private App() {
 
         /* dimension variables */
-        anchorSize = 100;
+        anchorSize = 50;
         anchorOuterMargin = 20;
-        selectorSize = 60;
+        selectorSize = 40;
 
         movementRate = 2.0f;
-
 
     }
 
