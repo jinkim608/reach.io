@@ -16,7 +16,6 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         globalService = new Intent(this, GlobalTouchService.class);
-
     }
 
     public void buttonClicked(View v) {
@@ -32,7 +31,10 @@ public class MainActivity extends Activity {
             ((Button) v).setText("Start Service");
             Toast.makeText(this, "Stop Service", Toast.LENGTH_SHORT).show();
         }
+    }
 
+    public void simulateClick(View v) {
+        
     }
 
 

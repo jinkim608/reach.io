@@ -70,7 +70,7 @@ public class GlobalTouchService extends Service implements OnTouchListener {
         display.getSize(size);
 
         anchorX = anchorOuterMargin;
-        anchorY = size.y - anchorSize - anchorOuterMargin - 40;
+        anchorY = size.y - anchorSize - anchorOuterMargin - 70;
 
         selectorX = anchorX;
         selectorY = anchorY;
