@@ -14,7 +14,6 @@ public class App extends Application {
     public int anchorOuterMargin;
     public int selectorSize;
     public int thumbSize;
-
     public float movementRate;
 
     private App() {
@@ -23,9 +22,9 @@ public class App extends Application {
         anchorSize = 155;
         anchorOuterMargin = 20;
 
-        selectorSize = 155;
+        selectorSize = 101;
 
-        thumbSize = 155;
+        thumbSize = 131;
 
         movementRate = 2.0f;
 

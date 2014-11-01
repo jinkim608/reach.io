@@ -81,8 +81,11 @@ public class GlobalTouchService extends Service implements OnTouchListener {
         anchorX = anchorOuterMargin;
         anchorY = size.y - anchorSize - anchorOuterMargin - 70;
 
-        selectorX = anchorX;
-        selectorY = anchorY;
+        selectorX = anchorX + (anchorSize - selectorSize)/2;
+        selectorY = anchorY + (anchorSize - selectorSize)/2;
+
+        thumbX = anchorX + (anchorSize - thumbSize)/2;
+        thumbY = anchorY + (anchorSize - thumbSize)/2;
 
         // initialize image view for anchor and selector
 
@@ -114,7 +117,7 @@ public class GlobalTouchService extends Service implements OnTouchListener {
 
         /* layout param for thumb indicator */
         WindowManager.LayoutParams tParams = new WindowManager.LayoutParams(
-                app.thumbSize, app.thumbSize, anchorX, anchorY,
+                app.thumbSize, app.thumbSize, thumbX, thumbY,
                 WindowManager.LayoutParams.TYPE_PHONE, // Type Ohone, These are non-application windows providing user interaction with the phone (in particular incoming calls).
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, // this window won't ever get key input focus
                 PixelFormat.TRANSLUCENT);
