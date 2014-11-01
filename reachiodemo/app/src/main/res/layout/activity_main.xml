@@ -25,6 +25,6 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:text="Click"
-        android:onClick="simulateClick" />
+        android:onClick="testButtonClicked" />
 
 </RelativeLayout>

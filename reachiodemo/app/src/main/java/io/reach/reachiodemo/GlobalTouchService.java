@@ -15,6 +15,13 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
+import com.squareup.otto.Produce;
+import com.squareup.otto.Subscribe;
+
+import io.reach.reachiodemo.Bus.BusProvider;
+import io.reach.reachiodemo.Bus.SelectorLocationEvent;
+import io.reach.reachiodemo.Bus.TestButtonClickedEvent;
+
 public class GlobalTouchService extends Service implements OnTouchListener {
 
     private WindowManager mWindowManager;
@@ -54,6 +61,8 @@ public class GlobalTouchService extends Service implements OnTouchListener {
         super.onCreate();
 
         app = App.getInstance();
+
+        BusProvider.getInstance().register(this);
 
         mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         display = mWindowManager.getDefaultDisplay();
@@ -128,6 +137,9 @@ public class GlobalTouchService extends Service implements OnTouchListener {
 
     @Override
     public void onDestroy() {
+
+        BusProvider.getInstance().unregister(this);
+
         if (mWindowManager != null) {
             if (ivSelector != null) mWindowManager.removeView(ivSelector);
             if (ivAnchor != null) mWindowManager.removeView(ivAnchor);
@@ -187,5 +199,20 @@ public class GlobalTouchService extends Service implements OnTouchListener {
         mWindowManager.updateViewLayout(ivThumbIndicator, tParams);
     }
 
+    /*
+        Called when test button is clicked
+     */
+    @Subscribe
+    public void onTestButtonClicked(TestButtonClickedEvent event) {
+        // post event to send x and y
+        BusProvider.getInstance().post(produceSelectorLocationEvent());
+    }
 
+    /*
+        Notify with the selector's current location
+     */
+    @Produce
+    public SelectorLocationEvent produceSelectorLocationEvent() {
+        return new SelectorLocationEvent(selectorX, selectorY);
+    }
 }
