@@ -6,6 +6,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.os.IBinder;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -32,14 +33,6 @@ public class GlobalTouchService extends Service implements OnTouchListener {
 
     private ImageView ivThumbIndicator;
 
-    public static int anchorX;
-    public static int anchorY;
-    public static int selectorX;
-    public static int selectorY;
-
-    public static int thumbX;
-    public static int thumbY;
-
     public Point size;
 
     private int selectorSize;
@@ -47,6 +40,19 @@ public class GlobalTouchService extends Service implements OnTouchListener {
     private int thumbSize;
     private float movementRate;
     private int anchorOuterMargin;
+    private int actionBarHeight;
+
+    // controller location (fixed during the interaction)
+    private int cX;
+    private int cY;
+
+    // touch location (rawX and rawY relative to screen)
+    public static int tX;
+    public static int tY;
+
+    // selector location (calculated vector added to touch location)
+    public static int sX;
+    public static int sY;
 
     private App app;
 
@@ -67,28 +73,9 @@ public class GlobalTouchService extends Service implements OnTouchListener {
         mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         display = mWindowManager.getDefaultDisplay();
 
-        /* initialize anchor and selector sizes and locations */
-        anchorSize = app.anchorSize;
-        selectorSize = app.selectorSize;
-        thumbSize = app.thumbSize;
-        movementRate = app.movementRate;
-        anchorOuterMargin = app.anchorOuterMargin;
-
-        // get screen dimension in px
-        size = new Point();
-        display.getSize(size);
-
-        anchorX = anchorOuterMargin;
-        anchorY = size.y - anchorSize - anchorOuterMargin - 70;
-
-        selectorX = anchorX + (anchorSize - selectorSize)/2;
-        selectorY = anchorY + (anchorSize - selectorSize)/2;
-
-        thumbX = anchorX + (anchorSize - thumbSize)/2;
-        thumbY = anchorY + (anchorSize - thumbSize)/2;
+        initLocations();
 
         // initialize image view for anchor and selector
-
         ivAnchor = new ImageView(this);
         ivAnchor.setImageDrawable(getResources().getDrawable(R.drawable.thumb_03));
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(anchorSize, anchorSize);
@@ -108,7 +95,8 @@ public class GlobalTouchService extends Service implements OnTouchListener {
 
         /* layout param for selector */
         WindowManager.LayoutParams eParams = new WindowManager.LayoutParams(
-                selectorSize, selectorSize, selectorX, selectorY, WindowManager.LayoutParams.TYPE_PHONE,
+                selectorSize, selectorSize, sX - (selectorSize / 2), sY - (selectorSize / 2) - actionBarHeight / 2,
+                WindowManager.LayoutParams.TYPE_PHONE,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
         eParams.gravity = Gravity.LEFT | Gravity.TOP;
@@ -117,7 +105,7 @@ public class GlobalTouchService extends Service implements OnTouchListener {
 
         /* layout param for thumb indicator */
         WindowManager.LayoutParams tParams = new WindowManager.LayoutParams(
-                app.thumbSize, app.thumbSize, thumbX, thumbY,
+                app.thumbSize, app.thumbSize, tX - (thumbSize / 2), tY - (thumbSize / 2) - actionBarHeight / 2,
                 WindowManager.LayoutParams.TYPE_PHONE, // Type Ohone, These are non-application windows providing user interaction with the phone (in particular incoming calls).
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, // this window won't ever get key input focus
                 PixelFormat.TRANSLUCENT);
@@ -127,7 +115,7 @@ public class GlobalTouchService extends Service implements OnTouchListener {
 
         /* layout param for anchor */
         WindowManager.LayoutParams mParams = new WindowManager.LayoutParams(
-                anchorSize, anchorSize, anchorX, anchorY,
+                anchorSize, anchorSize, cX - (anchorSize / 2), cY - (anchorSize / 2) - actionBarHeight / 2,
                 WindowManager.LayoutParams.TYPE_PHONE, // Type Ohone, These are non-application windows providing user interaction with the phone (in particular incoming calls).
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, // this window won't ever get key input focus
                 PixelFormat.TRANSLUCENT);
@@ -147,7 +135,6 @@ public class GlobalTouchService extends Service implements OnTouchListener {
             if (ivSelector != null) mWindowManager.removeView(ivSelector);
             if (ivAnchor != null) mWindowManager.removeView(ivAnchor);
             if (ivAnchor != null) mWindowManager.removeView(ivThumbIndicator);
-
         }
         super.onDestroy();
     }
@@ -155,20 +142,15 @@ public class GlobalTouchService extends Service implements OnTouchListener {
     @Override
     public boolean onTouch(View v, MotionEvent event) {
 
-        Log.d("====", "rawY: " + event.getRawY() + ",\t anchorY: " + anchorY);
+        Log.d("====", "rawY: " + event.getRawY() + ",\t controlY: " + cY);
 
-        /* getRaw to get coordinates relative to screen, not from view itself
-         * calculate difference from the anchor point */
-        float dx = event.getRawX() - anchorX;
-        float dy = event.getRawY() - anchorSize - anchorOuterMargin - anchorY;
+        tX = (int) event.getRawX();
+        tY = (int) event.getRawY();
+
+        sX = (int) (tX + (tX - cX) * (movementRate - 1));
+        sY = (int) (tY + (tY - cY) * (movementRate - 1));
 
         /* update selector location with 2 * the vector from anchor point to touch point */
-        selectorX = (int) (anchorX - (selectorSize) + movementRate * dx);
-        selectorY = (int) (anchorY + movementRate * dy);
-
-        thumbX = (int) (event.getRawX());
-        thumbY = (int) (event.getRawY());
-
 
         if (event.getAction() == MotionEvent.ACTION_MOVE) {
 //            Log.d("####", "onTouch -- dx: " + dx + ",\t dy: " + dy);
@@ -183,7 +165,7 @@ public class GlobalTouchService extends Service implements OnTouchListener {
 
         /* update the selector point according to the current touch location */
         WindowManager.LayoutParams mParams = new WindowManager.LayoutParams(
-                selectorSize, selectorSize, selectorX, selectorY + (selectorSize / 2),
+                selectorSize, selectorSize, sX - (selectorSize / 2), sY - (selectorSize / 2) - actionBarHeight / 2,
                 WindowManager.LayoutParams.TYPE_PHONE, // Type Ohone, These are non-application windows providing user interaction with the phone (in particular incoming calls).
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, // this window won't ever get key input focus
                 PixelFormat.TRANSLUCENT);
@@ -193,13 +175,42 @@ public class GlobalTouchService extends Service implements OnTouchListener {
 
         /* update thumb location indicator */
         WindowManager.LayoutParams tParams = new WindowManager.LayoutParams(
-                thumbSize, thumbSize, thumbX - (thumbSize / 2), thumbY - thumbSize,
+                thumbSize, thumbSize, tX - (thumbSize / 2), tY - (thumbSize / 2) - actionBarHeight / 2,
                 WindowManager.LayoutParams.TYPE_PHONE, // Type Ohone, These are non-application windows providing user interaction with the phone (in particular incoming calls).
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, // this window won't ever get key input focus
                 PixelFormat.TRANSLUCENT);
         tParams.gravity = Gravity.LEFT | Gravity.TOP;
 
         mWindowManager.updateViewLayout(ivThumbIndicator, tParams);
+    }
+
+    /* Place anchor, thumbIndicator, and selector at the initial component location */
+    private void initLocations() {
+
+        // get screen dimension in px
+        size = new Point();
+        display.getSize(size);
+
+        // Calculate ActionBar height
+        TypedValue tv = new TypedValue();
+        if (getTheme().resolveAttribute(android.R.attr.actionBarSize, tv, true)) {
+            actionBarHeight = TypedValue.complexToDimensionPixelSize(tv.data, getResources().getDisplayMetrics());
+        }
+
+        anchorSize = app.anchorSize;
+        selectorSize = app.selectorSize;
+        thumbSize = app.thumbSize;
+        movementRate = app.movementRate;
+        anchorOuterMargin = app.anchorOuterMargin;
+
+        cX = anchorOuterMargin + anchorSize / 2;
+        cY = size.y - anchorOuterMargin - anchorSize / 2;
+
+        tX = cX;
+        tY = cY;
+
+        sX = cX;
+        sY = cY;
     }
 
     /*
@@ -216,6 +227,6 @@ public class GlobalTouchService extends Service implements OnTouchListener {
      */
     @Produce
     public SelectorLocationEvent produceSelectorLocationEvent() {
-        return new SelectorLocationEvent(selectorX, selectorY);
+        return new SelectorLocationEvent(sX, sY);
     }
 }

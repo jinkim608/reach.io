@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.otto.Produce;
@@ -18,12 +19,14 @@ import io.reach.reachiodemo.Bus.TestButtonClickedEvent;
 public class MainActivity extends Activity {
 
     Intent globalService;
+    private TextView tvSelectorLoc;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         globalService = new Intent(this, GlobalTouchService.class);
+        tvSelectorLoc = (TextView) findViewById(R.id.tv_selector_loc);
     }
 
     public void buttonClicked(View v) {
@@ -60,7 +63,8 @@ public class MainActivity extends Activity {
      */
     @Subscribe
     public void onSelectorLocationEvent(SelectorLocationEvent event) {
-        Log.d("####", "in Main X: " + event.x + ",  Y: " + event.y);
+        tvSelectorLoc.setText("" + event.x + ", " + event.y + ")");
+//        Log.d("####", "in Main X: " + event.x + ",  Y: " + event.y);
     }
 
     @Override

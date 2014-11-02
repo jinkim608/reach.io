@@ -6,7 +6,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".MainActivity" >
+    tools:context=".MainActivity">
 
     <Button
         android:id="@+id/button1"
@@ -26,5 +26,22 @@
         android:layout_alignParentRight="true"
         android:text="Click"
         android:onClick="testButtonClicked" />
+
+    <TextView
+        android:id="@+id/tv_selector_loc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/lbl_touch_loc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@id/tv_selector_loc"
+        android:layout_centerVertical="true"
+        android:text="Touch loc: (" />
+
 
 </RelativeLayout>

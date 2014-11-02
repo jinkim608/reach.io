@@ -27,7 +27,6 @@ public class App extends Application {
         thumbSize = 131;
 
         movementRate = 2.0f;
-
     }
 
 
