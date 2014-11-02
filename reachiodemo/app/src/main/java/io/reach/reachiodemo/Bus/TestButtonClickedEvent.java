@@ -1,4 +1,4 @@
-package io.reach.reachiodemo.Bus;
+package io.reach.reachiodemo.bus;
 
 /**
  * Created by Jin on 10/31/14.

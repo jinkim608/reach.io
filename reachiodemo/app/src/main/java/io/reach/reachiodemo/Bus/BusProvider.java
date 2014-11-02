@@ -1,4 +1,4 @@
-package io.reach.reachiodemo.Bus;
+package io.reach.reachiodemo.bus;
 
 /*
  * Copyright (C) 2012 Square, Inc.

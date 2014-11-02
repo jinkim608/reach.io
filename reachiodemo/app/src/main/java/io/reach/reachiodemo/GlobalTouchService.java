@@ -19,11 +19,12 @@ import android.widget.ImageView;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 
-import io.reach.reachiodemo.Bus.BusProvider;
-import io.reach.reachiodemo.Bus.SelectorLocationEvent;
-import io.reach.reachiodemo.Bus.TestButtonClickedEvent;
+import io.reach.reachiodemo.bus.BusProvider;
+import io.reach.reachiodemo.bus.SelectorLocationEvent;
+import io.reach.reachiodemo.bus.TestButtonClickedEvent;
+import io.reach.reachiodemo.interaction.OnFlingGestureListener;
 
-public class GlobalTouchService extends Service implements OnTouchListener {
+public class GlobalTouchService extends Service {
 
     private WindowManager mWindowManager;
     private Display display;
@@ -61,7 +62,6 @@ public class GlobalTouchService extends Service implements OnTouchListener {
         return null;
     }
 
-
     @Override
     public void onCreate() {
         super.onCreate();
@@ -80,7 +80,32 @@ public class GlobalTouchService extends Service implements OnTouchListener {
         ivAnchor.setImageDrawable(getResources().getDrawable(R.drawable.thumb_03));
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(anchorSize, anchorSize);
         ivAnchor.setLayoutParams(params);
-        ivAnchor.setOnTouchListener(this);
+        ivAnchor.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                Log.d("####", "rawY: " + event.getRawY() + ",\t controlY: " + cY);
+
+                tX = (int) event.getRawX();
+                tY = (int) event.getRawY();
+
+                sX = (int) (tX + (tX - cX) * (movementRate - 1));
+                sY = (int) (tY + (tY - cY) * (movementRate - 1));
+
+                /* update selector location with 2 * the vector from anchor point to touch point */
+
+                if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                    // Log.d("####", "onTouch -- dx: " + dx + ",\t dy: " + dy);
+                    // Log.d("####", "x: " + event.getX() + ",\t y: " + event.getY());
+                }
+                updateIndicatorLocations();
+
+                //TODO: Determine when to enable and disable interaction
+                enableControlInteraction();
+
+                return true;
+            }
+        });
 
         ivSelector = new ImageView(this);
 
@@ -122,8 +147,51 @@ public class GlobalTouchService extends Service implements OnTouchListener {
         mParams.gravity = Gravity.LEFT | Gravity.TOP;
 
         mWindowManager.addView(ivAnchor, mParams);
+    }
 
+    private void enableControlInteraction() {
 
+        // TODO: Send detected event to MainActivity
+
+        ivThumbIndicator.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Log.d("####", "Click detected on interaction region");
+            }
+        });
+
+        ivThumbIndicator.setOnTouchListener(new OnFlingGestureListener() {
+            @Override
+            public void onTopToBottom() {
+                //Your code here
+                Log.d("####", "Top to bottom swipe detected on interaction region");
+            }
+
+            @Override
+            public void onRightToLeft() {
+                //Your code here
+                Log.d("####", "Right to left swipe detected on interaction region");
+            }
+
+            @Override
+            public void onLeftToRight() {
+                //Your code here
+                Log.d("####", "Left to right swipe detected on interaction region");
+            }
+
+            @Override
+            public void onBottomToTop() {
+                //Your code here
+                Log.d("####", "Bottom to top swipe detected on interaction region");
+            }
+        });
+
+    }
+
+    private void disableControlInteraction() {
+        ivThumbIndicator.setOnClickListener(null);
+        ivThumbIndicator.setOnTouchListener(null);
     }
 
     @Override
@@ -139,27 +207,6 @@ public class GlobalTouchService extends Service implements OnTouchListener {
         super.onDestroy();
     }
 
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-
-        Log.d("====", "rawY: " + event.getRawY() + ",\t controlY: " + cY);
-
-        tX = (int) event.getRawX();
-        tY = (int) event.getRawY();
-
-        sX = (int) (tX + (tX - cX) * (movementRate - 1));
-        sY = (int) (tY + (tY - cY) * (movementRate - 1));
-
-        /* update selector location with 2 * the vector from anchor point to touch point */
-
-        if (event.getAction() == MotionEvent.ACTION_MOVE) {
-//            Log.d("####", "onTouch -- dx: " + dx + ",\t dy: " + dy);
-//            Log.d("####", "x: " + event.getX() + ",\t y: " + event.getY());
-        }
-        updateIndicatorLocations();
-
-        return true;
-    }
 
     private void updateIndicatorLocations() {
 

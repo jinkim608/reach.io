@@ -3,7 +3,6 @@ package io.reach.reachiodemo;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -12,9 +11,9 @@ import android.widget.Toast;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 
-import io.reach.reachiodemo.Bus.BusProvider;
-import io.reach.reachiodemo.Bus.SelectorLocationEvent;
-import io.reach.reachiodemo.Bus.TestButtonClickedEvent;
+import io.reach.reachiodemo.bus.BusProvider;
+import io.reach.reachiodemo.bus.SelectorLocationEvent;
+import io.reach.reachiodemo.bus.TestButtonClickedEvent;
 
 public class MainActivity extends Activity {
 
