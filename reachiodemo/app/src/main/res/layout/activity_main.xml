@@ -39,9 +39,21 @@
         android:id="@+id/lbl_touch_loc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toLeftOf="@id/tv_selector_loc"
-        android:layout_centerVertical="true"
-        android:text="Touch loc: (" />
+        android:text="Touch loc: ("
+        android:layout_alignTop="@+id/tv_selector_loc"
+        android:layout_toLeftOf="@+id/btn_test"
+        android:layout_toStartOf="@+id/btn_test" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Target"
+        android:id="@+id/target"
+        android:layout_below="@+id/button1"
+        android:layout_toLeftOf="@+id/lbl_touch_loc"
+        android:layout_toStartOf="@+id/lbl_touch_loc"
+        android:layout_marginTop="20dp"
+        android:onClick="targetClicked"/>
 
 
 </RelativeLayout>

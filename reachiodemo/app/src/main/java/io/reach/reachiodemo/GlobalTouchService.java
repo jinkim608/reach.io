@@ -267,6 +267,7 @@ public class GlobalTouchService extends Service {
     public void onTestButtonClicked(TestButtonClickedEvent event) {
         // post event to send x and y
         BusProvider.getInstance().post(produceSelectorLocationEvent());
+//        Log.d("####", "TestButtonClicked");
     }
 
     /*
