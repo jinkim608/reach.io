@@ -36,4 +36,10 @@ public class App extends Application {
         }
         return mInstance;
     }
+
+    public static enum SwipeDirection {
+        Left,
+        Right;
+
+    }
 }

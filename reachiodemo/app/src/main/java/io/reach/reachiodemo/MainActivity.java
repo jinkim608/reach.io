@@ -14,8 +14,11 @@ import android.widget.Toast;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 
+import io.reach.reachiodemo.App.SwipeDirection;
 import io.reach.reachiodemo.bus.BusProvider;
-import io.reach.reachiodemo.bus.SelectorLocationEvent;
+import io.reach.reachiodemo.bus.RegionClickEvent;
+import io.reach.reachiodemo.bus.RegionSwipeLeftEvent;
+import io.reach.reachiodemo.bus.RegionSwipeRightEvent;
 import io.reach.reachiodemo.bus.TestButtonClickedEvent;
 
 public class MainActivity extends Activity {
@@ -51,13 +54,13 @@ public class MainActivity extends Activity {
             Toast.makeText(this, "Stop Service", Toast.LENGTH_SHORT).show();
         }
     }
-
-    // test button on click
-    public void testButtonClicked(View v) {
-        // post bus event
-        BusProvider.getInstance().post(produceTestButtonClickedEvent());
-
-    }
+//
+//    // test button on click
+//    public void testButtonClicked(View v) {
+//        // post bus event
+//        BusProvider.getInstance().post(produceTestButtonClickedEvent());
+//
+//    }
 
     /*
         Notify that the test button is clicked: MainAct --> Service
@@ -70,21 +73,27 @@ public class MainActivity extends Activity {
     /*
         Called when X and Y values are returned: Service --> MainAct
      */
-    @Subscribe
-    public void onSelectorLocationEvent(SelectorLocationEvent event) {
-        tvSelectorLoc.setText("" + event.x + ", " + event.y + ")");
-//      Log.d("####", "in Main X: " + event.x + ",  Y: " + event.y);
+//    @Subscribe
+//    public void onSelectorLocationEvent(SelectorLocationEvent event) {
+//        tvSelectorLoc.setText("" + event.x + ", " + event.y + ")");
+////      Log.d("####", "in Main X: " + event.x + ",  Y: " + event.y);
+//
+////        simulateClick(event);
+//    }
 
-        simulateTouch(event);
+    @Subscribe
+    public void onRegionClickEvent(RegionClickEvent event) {
+        simulateClick(event.sX, event.sY);
     }
 
     // simulate touch event
-    private void simulateTouch(SelectorLocationEvent event) {
+    private void simulateClick(int eX, int eY) {
         long downTime = SystemClock.uptimeMillis();
         long eventTime = SystemClock.uptimeMillis() + 100;
-        float x = event.x * 1.0f;
-        float y = event.y * 1.0f;
-// List of meta states found here: developer.android.com/reference/android/view/KeyEvent.html#getMetaState()
+        float x = eX * 1.0f;
+        float y = eY * 1.0f;
+
+        // List of meta states found here: developer.android.com/reference/android/view/KeyEvent.html#getMetaState()
         int metaState = 0;
         MotionEvent motionEvent = MotionEvent.obtain(
                 downTime,
@@ -117,6 +126,28 @@ public class MainActivity extends Activity {
         dispatchTouchEvent(motionEvent_UP);
     }
 
+    @Subscribe
+    public void onRegionSwipeLeftEvent(RegionSwipeLeftEvent event) {
+        simulateSwipe(event.sX, event.sY, SwipeDirection.Left);
+    }
+
+    @Subscribe
+    public void onRegionSwipeRightEvent(RegionSwipeRightEvent event) {
+        simulateSwipe(event.sX, event.sY, SwipeDirection.Right);
+    }
+
+    /* simulate swipe gesture at the x, y location to the direction passed in */
+    private void simulateSwipe(int eX, int eY, SwipeDirection direction) {
+
+        if (direction == SwipeDirection.Left) {
+            // swipe to the left
+            Log.d("####", "swipe at (" + eX + ", " + eY + ") to: LEFT");
+        } else {
+            // swipe to the right
+            Log.d("####", "swipe at (" + eX + ", " + eY + ") to: RIGHT");
+        }
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -132,6 +163,4 @@ public class MainActivity extends Activity {
         // Always unregister when an object no longer should be on the bus.
         BusProvider.getInstance().unregister(this);
     }
-
-
 }

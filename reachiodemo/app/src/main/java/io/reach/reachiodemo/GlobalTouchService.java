@@ -17,11 +17,11 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.squareup.otto.Produce;
-import com.squareup.otto.Subscribe;
 
 import io.reach.reachiodemo.bus.BusProvider;
-import io.reach.reachiodemo.bus.SelectorLocationEvent;
-import io.reach.reachiodemo.bus.TestButtonClickedEvent;
+import io.reach.reachiodemo.bus.RegionClickEvent;
+import io.reach.reachiodemo.bus.RegionSwipeLeftEvent;
+import io.reach.reachiodemo.bus.RegionSwipeRightEvent;
 import io.reach.reachiodemo.interaction.OnFlingGestureListener;
 
 public class GlobalTouchService extends Service {
@@ -156,8 +156,8 @@ public class GlobalTouchService extends Service {
         ivThumbIndicator.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 Log.d("####", "Click detected on interaction region");
+                BusProvider.getInstance().post(produceRegionClickEvent());
             }
         });
 
@@ -172,12 +172,14 @@ public class GlobalTouchService extends Service {
             public void onRightToLeft() {
                 //Your code here
                 Log.d("####", "Right to left swipe detected on interaction region");
+                BusProvider.getInstance().post(produceRegionSwipeLeftEvent());
             }
 
             @Override
             public void onLeftToRight() {
                 //Your code here
                 Log.d("####", "Left to right swipe detected on interaction region");
+                BusProvider.getInstance().post(produceRegionSwipeRightEvent());
             }
 
             @Override
@@ -263,18 +265,33 @@ public class GlobalTouchService extends Service {
     /*
         Called when test button is clicked
      */
-    @Subscribe
-    public void onTestButtonClicked(TestButtonClickedEvent event) {
-        // post event to send x and y
-        BusProvider.getInstance().post(produceSelectorLocationEvent());
-//        Log.d("####", "TestButtonClicked");
-    }
+//    @Subscribe
+//    public void onTestButtonClicked(TestButtonClickedEvent event) {
+//        // post event to send x and y
+//        BusProvider.getInstance().post(produceSelectorLocationEvent());
+////        Log.d("####", "TestButtonClicked");
+//    }
 
     /*
         Notify with the selector's current location
      */
+//    @Produce
+//    public SelectorLocationEvent produceSelectorLocationEvent() {
+//        return new SelectorLocationEvent(sX, sY);
+//    }
+
     @Produce
-    public SelectorLocationEvent produceSelectorLocationEvent() {
-        return new SelectorLocationEvent(sX, sY);
+    public RegionClickEvent produceRegionClickEvent() {
+        return new RegionClickEvent(sX, sY);
+    }
+
+    @Produce
+    public RegionSwipeLeftEvent produceRegionSwipeLeftEvent() {
+        return new RegionSwipeLeftEvent(sX, sY);
+    }
+
+    @Produce
+    public RegionSwipeRightEvent produceRegionSwipeRightEvent() {
+        return new RegionSwipeRightEvent(sX, sY);
     }
 }
