@@ -1,10 +1,16 @@
 package io.reach.reachiodemo;
 
-import android.app.Activity;
+import android.app.ActionBar;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -20,47 +26,110 @@ import io.reach.reachiodemo.bus.RegionClickEvent;
 import io.reach.reachiodemo.bus.RegionSwipeLeftEvent;
 import io.reach.reachiodemo.bus.RegionSwipeRightEvent;
 import io.reach.reachiodemo.bus.TestButtonClickedEvent;
+import io.reach.reachiodemo.ui.TabsPagerAdapter;
 
-public class MainActivity extends Activity {
+public class MainActivity extends FragmentActivity implements ActionBar.TabListener {
 
     Intent globalService;
     private TextView tvSelectorLoc;
     private int counter = 0;    // Count number of clicks on target button
+
+    private ViewPager viewPager;
+    private ActionBar actionBar;
+    private TabsPagerAdapter mAdapter;
+    private static boolean serviceRunning = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         globalService = new Intent(this, GlobalTouchService.class);
-        tvSelectorLoc = (TextView) findViewById(R.id.tv_selector_loc);
+
+        viewPager = (ViewPager) findViewById(R.id.pager);
+        mAdapter = new TabsPagerAdapter(getSupportFragmentManager());
+        viewPager.setAdapter(mAdapter);
+
+        actionBar = getActionBar();
+
+        // Specify that tabs should be displayed in the action bar.
+        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+        // Create a tab listener that is called when the user changes tabs.
+        ActionBar.TabListener tabListener = new ActionBar.TabListener() {
+            public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+                viewPager.setCurrentItem(tab.getPosition());
+                // show the given tab
+            }
+
+            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+                // hide the given tab
+            }
+
+            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+                // probably ignore this event
+            }
+        };
+
+        // Add 3 tabs, specifying the tab's text and TabListener
+        for (int i = 0; i < 2; i++) {
+            actionBar.addTab(
+                    actionBar.newTab()
+                            .setText("Tab " + (i + 1))
+                            .setTabListener(tabListener));
+        }
+
+        viewPager.setOnPageChangeListener(
+                new ViewPager.SimpleOnPageChangeListener() {
+                    @Override
+                    public void onPageSelected(int position) {
+                        // When swiping between pages, select the
+                        // corresponding tab.
+                        getActionBar().setSelectedNavigationItem(position);
+                    }
+                });
+
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu items for use in the action bar
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.main, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle presses on the action bar items
+        switch (item.getItemId()) {
+            case R.id.action_service:
+                //TODO
+                if (!serviceRunning) {
+                    Toast.makeText(this, "Start Service", Toast.LENGTH_SHORT).show();
+                    startService(globalService);
+                    serviceRunning = true;
+                    item.setIcon(R.drawable.stop);
+
+
+                } else {
+                    Toast.makeText(this, "Stop Service", Toast.LENGTH_SHORT).show();
+                    stopService(globalService);
+                    serviceRunning = false;
+                    item.setIcon(R.drawable.start);
+                }
+
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     public void targetClicked(View v) {
         counter++;
         ((Button) v).setText(String.valueOf(counter));
     }
-
-    public void buttonClicked(View v) {
-
-        if (v.getTag() == null) {
-            startService(globalService);
-            v.setTag("on");
-            ((Button) v).setText("Stop Service");
-            Toast.makeText(this, "Start Service", Toast.LENGTH_SHORT).show();
-        } else {
-            stopService(globalService);
-            v.setTag(null);
-            ((Button) v).setText("Start Service");
-            Toast.makeText(this, "Stop Service", Toast.LENGTH_SHORT).show();
-        }
-    }
-//
-//    // test button on click
-//    public void testButtonClicked(View v) {
-//        // post bus event
-//        BusProvider.getInstance().post(produceTestButtonClickedEvent());
-//
-//    }
 
     /*
         Notify that the test button is clicked: MainAct --> Service
@@ -163,4 +232,36 @@ public class MainActivity extends Activity {
         // Always unregister when an object no longer should be on the bus.
         BusProvider.getInstance().unregister(this);
     }
+
+    @Override
+    public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+        viewPager.setCurrentItem(tab.getPosition());
+
+        viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+
+            @Override
+            public void onPageSelected(int position) {
+                actionBar.setSelectedNavigationItem(position);
+            }
+
+            @Override
+            public void onPageScrolled(int arg0, float arg1, int arg2) {
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int arg0) {
+            }
+        });
+    }
+
+    @Override
+    public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+
+    }
+
+    @Override
+    public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+
+    }
+
 }
