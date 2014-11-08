@@ -28,6 +28,7 @@ public class FirstFragment extends android.support.v4.app.Fragment {
     {
         super.onCreate(saveInstanceState);
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

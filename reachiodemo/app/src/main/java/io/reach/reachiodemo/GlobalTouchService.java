@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.util.TypedValue;
@@ -17,6 +18,9 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.squareup.otto.Produce;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 import io.reach.reachiodemo.bus.BusProvider;
 import io.reach.reachiodemo.bus.RegionClickEvent;
@@ -57,6 +61,10 @@ public class GlobalTouchService extends Service {
 
     private App app;
 
+    private Handler handler;
+    private Timer timer;
+    private TimerTask timerTask;
+
     @Override
     public IBinder onBind(Intent arg0) {
         return null;
@@ -65,6 +73,8 @@ public class GlobalTouchService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        handler = new Handler();
 
         app = App.getInstance();
 
@@ -103,9 +113,26 @@ public class GlobalTouchService extends Service {
                 //TODO: Determine when to enable and disable interaction
                 enableControlInteraction();
 
+                if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
+                    resetTimer();
+                    Log.d("TouchTest", "Touch up");
+                }
+
+
                 return true;
             }
+
+
         });
+
+//        FrameLayout fl = new FrameLayout(this);
+//        WindowManager.LayoutParams fParams = new WindowManager.LayoutParams(
+//                WindowManager.LayoutParams.WRAP_CONTENT,
+//                WindowManager.LayoutParams.WRAP_CONTENT,
+//                WindowManager.LayoutParams.TYPE_PHONE,
+//                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+//                PixelFormat.TRANSLUCENT);
+//        fl.setLayoutParams(fParams);
 
         ivSelector = new ImageView(this);
 
@@ -157,6 +184,8 @@ public class GlobalTouchService extends Service {
             @Override
             public void onClick(View v) {
                 Log.d("####", "Click detected on interaction region");
+                resetTimer();
+
                 BusProvider.getInstance().post(produceRegionClickEvent());
             }
         });
@@ -171,6 +200,7 @@ public class GlobalTouchService extends Service {
             @Override
             public void onRightToLeft() {
                 //Your code here
+                resetLocations();
                 Log.d("####", "Right to left swipe detected on interaction region");
                 BusProvider.getInstance().post(produceRegionSwipeLeftEvent());
             }
@@ -191,6 +221,16 @@ public class GlobalTouchService extends Service {
 
     }
 
+    private void resetTimer() {
+        if (timer != null) {
+            timer.cancel();
+        }
+        timer = new Timer();
+        timerTask = new MyTimerTask();
+
+        timer.schedule(timerTask, app.RESET_DELAY);
+    }
+
     private void disableControlInteraction() {
         ivThumbIndicator.setOnClickListener(null);
         ivThumbIndicator.setOnTouchListener(null);
@@ -199,6 +239,8 @@ public class GlobalTouchService extends Service {
     @Override
     public void onDestroy() {
 
+        super.onDestroy();
+
         BusProvider.getInstance().unregister(this);
 
         if (mWindowManager != null) {
@@ -206,7 +248,11 @@ public class GlobalTouchService extends Service {
             if (ivAnchor != null) mWindowManager.removeView(ivAnchor);
             if (ivAnchor != null) mWindowManager.removeView(ivThumbIndicator);
         }
-        super.onDestroy();
+
+        if (timer != null) {
+            timer.cancel();
+        }
+
     }
 
 
@@ -219,7 +265,7 @@ public class GlobalTouchService extends Service {
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, // this window won't ever get key input focus
                 PixelFormat.TRANSLUCENT);
         mParams.gravity = Gravity.LEFT | Gravity.TOP;
-
+        mParams.windowAnimations = android.R.style.Animation_Translucent;
         mWindowManager.updateViewLayout(ivSelector, mParams);
 
         /* update thumb location indicator */
@@ -229,6 +275,7 @@ public class GlobalTouchService extends Service {
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, // this window won't ever get key input focus
                 PixelFormat.TRANSLUCENT);
         tParams.gravity = Gravity.LEFT | Gravity.TOP;
+        tParams.windowAnimations = android.R.style.Animation_Translucent;
 
         mWindowManager.updateViewLayout(ivThumbIndicator, tParams);
     }
@@ -262,23 +309,27 @@ public class GlobalTouchService extends Service {
         sY = cY;
     }
 
-    /*
-        Called when test button is clicked
-     */
-//    @Subscribe
-//    public void onTestButtonClicked(TestButtonClickedEvent event) {
-//        // post event to send x and y
-//        BusProvider.getInstance().post(produceSelectorLocationEvent());
-////        Log.d("####", "TestButtonClicked");
-//    }
+    private void resetLocations() {
 
-    /*
-        Notify with the selector's current location
-     */
-//    @Produce
-//    public SelectorLocationEvent produceSelectorLocationEvent() {
-//        return new SelectorLocationEvent(sX, sY);
-//    }
+        Log.d("####", "Resetting indicator locations");
+//        Animation moveRighttoLeft = new TranslateAnimation(tX, cX, tY, cY);
+//        moveRighttoLeft.setDuration(1000);
+//
+//        AnimationSet animation = new AnimationSet(false);
+//        animation.addAnimation(moveRighttoLeft);
+
+//        ivThumbIndicator.setAnimation(animation);
+//        ivThumbIndicator.startAnimation(animation);
+
+        tX = cX;
+        tY = cY;
+
+        sX = cX;
+        sY = cY;
+
+
+        updateIndicatorLocations();
+    }
 
     @Produce
     public RegionClickEvent produceRegionClickEvent() {
@@ -293,5 +344,24 @@ public class GlobalTouchService extends Service {
     @Produce
     public RegionSwipeRightEvent produceRegionSwipeRightEvent() {
         return new RegionSwipeRightEvent(sX, sY);
+    }
+
+    /* timer task to reset indicator locations */
+    class MyTimerTask extends TimerTask {
+
+        @Override
+        public void run() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    resetLocations();
+                }
+            });
+        }
+
+        // use handler to call the method for UI thread
+        private void runOnUiThread(Runnable runnable) {
+            handler.post(runnable);
+        }
     }
 }

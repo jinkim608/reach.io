@@ -32,9 +32,9 @@ public class TabsPagerAdapter extends FragmentPagerAdapter {
     public CharSequence getPageTitle(int position) {
         switch (position) {
             case 0:
-                return "FIRST";
+                return "Green Apple";
             case 1:
-                return "SECOND";
+                return "Earth";
         }
 
         return "TITLE";

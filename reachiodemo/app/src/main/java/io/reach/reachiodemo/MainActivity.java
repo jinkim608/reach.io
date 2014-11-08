@@ -1,7 +1,9 @@
 package io.reach.reachiodemo;
 
 import android.app.ActionBar;
+import android.app.ActivityManager;
 import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -14,7 +16,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.squareup.otto.Produce;
@@ -31,7 +32,6 @@ import io.reach.reachiodemo.ui.TabsPagerAdapter;
 public class MainActivity extends FragmentActivity implements ActionBar.TabListener {
 
     Intent globalService;
-    private TextView tvSelectorLoc;
     private int counter = 0;    // Count number of clicks on target button
 
     private ViewPager viewPager;
@@ -44,6 +44,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         globalService = new Intent(this, GlobalTouchService.class);
+
 
         viewPager = (ViewPager) findViewById(R.id.pager);
         mAdapter = new TabsPagerAdapter(getSupportFragmentManager());
@@ -96,6 +97,10 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
 
+        if (isServiceRunning(GlobalTouchService.class)) {
+            menu.getItem(0).setIcon(R.drawable.stop);
+        }
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -105,17 +110,17 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         switch (item.getItemId()) {
             case R.id.action_service:
                 //TODO
-                if (!serviceRunning) {
+                if (!isServiceRunning(GlobalTouchService.class)) {
                     Toast.makeText(this, "Start Service", Toast.LENGTH_SHORT).show();
                     startService(globalService);
-                    serviceRunning = true;
+//                    serviceRunning = true;
                     item.setIcon(R.drawable.stop);
 
 
                 } else {
                     Toast.makeText(this, "Stop Service", Toast.LENGTH_SHORT).show();
                     stopService(globalService);
-                    serviceRunning = false;
+//                    serviceRunning = false;
                     item.setIcon(R.drawable.start);
                 }
 
@@ -138,17 +143,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     public TestButtonClickedEvent produceTestButtonClickedEvent() {
         return new TestButtonClickedEvent();
     }
-
-    /*
-        Called when X and Y values are returned: Service --> MainAct
-     */
-//    @Subscribe
-//    public void onSelectorLocationEvent(SelectorLocationEvent event) {
-//        tvSelectorLoc.setText("" + event.x + ", " + event.y + ")");
-////      Log.d("####", "in Main X: " + event.x + ",  Y: " + event.y);
-//
-////        simulateClick(event);
-//    }
 
     @Subscribe
     public void onRegionClickEvent(RegionClickEvent event) {
@@ -262,6 +256,16 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     @Override
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
 
+    }
+
+    private boolean isServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
