@@ -205,9 +205,79 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         if (direction == SwipeDirection.Left) {
             // swipe to the left
             Log.d("####", "swipe at (" + eX + ", " + eY + ") to: LEFT");
+
+            long downTime = SystemClock.uptimeMillis();
+//            long eventTime = SystemClock.uptimeMillis() + 100;
+
+            int metaState = 0;
+            MotionEvent motionEvent_Down = MotionEvent.obtain(
+                    downTime,
+                    SystemClock.uptimeMillis(),
+                    MotionEvent.ACTION_DOWN,
+                    eX,
+                    eY,
+                    metaState
+            );
+            dispatchTouchEvent(motionEvent_Down);
+
+            MotionEvent motionEvent_Move = MotionEvent.obtain(
+                    downTime,
+                    SystemClock.uptimeMillis(),
+                    MotionEvent.ACTION_MOVE,
+                    eX - 100,   //Swipe left
+                    eY,
+                    metaState
+            );
+            dispatchTouchEvent(motionEvent_Move);
+
+            MotionEvent motionEvent_Up = MotionEvent.obtain(
+                    downTime,
+                    SystemClock.uptimeMillis() + 1000,
+                    MotionEvent.ACTION_UP,
+                    eX - 100,
+                    eY,
+                    metaState
+            );
+            dispatchTouchEvent(motionEvent_Up);
+
+
         } else {
             // swipe to the right
             Log.d("####", "swipe at (" + eX + ", " + eY + ") to: RIGHT");
+
+            long downTime = SystemClock.uptimeMillis();
+//            long eventTime = SystemClock.uptimeMillis() + 100;
+
+            int metaState = 0;
+            MotionEvent motionEvent_Down = MotionEvent.obtain(
+                    downTime,
+                    SystemClock.uptimeMillis(),
+                    MotionEvent.ACTION_DOWN,
+                    eX,
+                    eY,
+                    metaState
+            );
+            dispatchTouchEvent(motionEvent_Down);
+
+            MotionEvent motionEvent_Move = MotionEvent.obtain(
+                    downTime,
+                    SystemClock.uptimeMillis(),
+                    MotionEvent.ACTION_MOVE,
+                    eX + 100,   //Swipe left
+                    eY,
+                    metaState
+            );
+            dispatchTouchEvent(motionEvent_Move);
+
+            MotionEvent motionEvent_Up = MotionEvent.obtain(
+                    downTime,
+                    SystemClock.uptimeMillis() + 1000,
+                    MotionEvent.ACTION_UP,
+                    eX + 100,
+                    eY,
+                    metaState
+            );
+            dispatchTouchEvent(motionEvent_Up);
         }
     }
 

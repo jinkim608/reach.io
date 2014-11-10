@@ -13,7 +13,10 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -33,9 +36,11 @@ public class GlobalTouchService extends Service {
     private WindowManager mWindowManager;
     private Display display;
 
+    // parent view that contains ImageViews
+    private ViewGroup mParentView;
+
     private ImageView ivAnchor;
     private ImageView ivSelector;
-
     private ImageView ivThumbIndicator;
 
     public Point size;
@@ -82,6 +87,9 @@ public class GlobalTouchService extends Service {
 
         mWindowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         display = mWindowManager.getDefaultDisplay();
+
+        // initialize parent ViewGroup
+        mParentView = new FrameLayout(this);
 
         initLocations();
 
@@ -151,9 +159,14 @@ public class GlobalTouchService extends Service {
                 WindowManager.LayoutParams.TYPE_PHONE,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
+
         eParams.gravity = Gravity.LEFT | Gravity.TOP;
 
-        mWindowManager.addView(ivSelector, eParams);
+//        mWindowManager.addView(ivSelector, eParams);
+
+        //Add ImageView inside the parent ViewGroup
+        mWindowManager.addView(mParentView, eParams);
+        mParentView.addView(ivSelector);
 
         /* layout param for thumb indicator */
         WindowManager.LayoutParams tParams = new WindowManager.LayoutParams(
@@ -187,6 +200,13 @@ public class GlobalTouchService extends Service {
                 resetTimer();
 
                 BusProvider.getInstance().post(produceRegionClickEvent());
+
+                // trigger click animation
+
+                Animation clickAnimation = new ScaleAnimation(1.0f, 0.2f, 1.0f, 0.2f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+                clickAnimation.setDuration(200);
+                clickAnimation.setFillAfter(false);
+                ivSelector.startAnimation(clickAnimation);
             }
         });
 
@@ -244,9 +264,14 @@ public class GlobalTouchService extends Service {
         BusProvider.getInstance().unregister(this);
 
         if (mWindowManager != null) {
-            if (ivSelector != null) mWindowManager.removeView(ivSelector);
+//            if (ivSelector != null) mWindowManager.removeView(ivSelector);
             if (ivAnchor != null) mWindowManager.removeView(ivAnchor);
             if (ivAnchor != null) mWindowManager.removeView(ivThumbIndicator);
+
+            // destroy mParentView
+
+            if (mParentView != null) mWindowManager.removeView(mParentView);
+
         }
 
         if (timer != null) {
@@ -266,7 +291,11 @@ public class GlobalTouchService extends Service {
                 PixelFormat.TRANSLUCENT);
         mParams.gravity = Gravity.LEFT | Gravity.TOP;
         mParams.windowAnimations = android.R.style.Animation_Translucent;
-        mWindowManager.updateViewLayout(ivSelector, mParams);
+//        mWindowManager.updateViewLayout(ivSelector, mParams);
+
+        //Update mParentView
+        mWindowManager.updateViewLayout(mParentView, mParams);
+
 
         /* update thumb location indicator */
         WindowManager.LayoutParams tParams = new WindowManager.LayoutParams(
