@@ -5,6 +5,8 @@ import android.app.ActivityManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.FragmentActivity;
@@ -45,7 +47,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         setContentView(R.layout.activity_main);
         globalService = new Intent(this, GlobalTouchService.class);
 
-
         viewPager = (ViewPager) findViewById(R.id.pager);
         mAdapter = new TabsPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(mAdapter);
@@ -54,6 +55,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
         // Specify that tabs should be displayed in the action bar.
         actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+        actionBar.setStackedBackgroundDrawable(new ColorDrawable(Color.parseColor("#243342")));
 
         // Create a tab listener that is called when the user changes tabs.
         ActionBar.TabListener tabListener = new ActionBar.TabListener() {
@@ -224,7 +227,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                     downTime,
                     SystemClock.uptimeMillis(),
                     MotionEvent.ACTION_MOVE,
-                    eX - 100,   //Swipe left
+                    eX - 150,   //Swipe left
                     eY,
                     metaState
             );
@@ -234,7 +237,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                     downTime,
                     SystemClock.uptimeMillis() + 1000,
                     MotionEvent.ACTION_UP,
-                    eX - 100,
+                    eX - 150,
                     eY,
                     metaState
             );
@@ -263,7 +266,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                     downTime,
                     SystemClock.uptimeMillis(),
                     MotionEvent.ACTION_MOVE,
-                    eX + 100,   //Swipe left
+                    eX + 150,   //Swipe left
                     eY,
                     metaState
             );
@@ -273,7 +276,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                     downTime,
                     SystemClock.uptimeMillis() + 1000,
                     MotionEvent.ACTION_UP,
-                    eX + 100,
+                    eX + 150,
                     eY,
                     metaState
             );

@@ -15,7 +15,7 @@ public class App extends Application {
     public int selectorSize;
     public int thumbSize;
     public float movementRate;
-    public final long RESET_DELAY = 2000; // 2 sec delay before resetting indicators
+    public final long RESET_DELAY = 3000; // delay in ms before resetting indicators
 
     private App() {
 

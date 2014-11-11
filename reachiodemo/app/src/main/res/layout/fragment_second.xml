@@ -6,9 +6,9 @@
 
 
     <ImageView
-        android:layout_margin="12dp"
+        android:layout_margin="20dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scaleType="fitCenter"
-        android:src="@drawable/earth" />
+        android:src="@drawable/soccer" />
 </LinearLayout>

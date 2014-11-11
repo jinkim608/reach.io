@@ -213,28 +213,25 @@ public class GlobalTouchService extends Service {
         ivThumbIndicator.setOnTouchListener(new OnFlingGestureListener() {
             @Override
             public void onTopToBottom() {
-                //Your code here
                 Log.d("####", "Top to bottom swipe detected on interaction region");
             }
 
             @Override
             public void onRightToLeft() {
-                //Your code here
-                resetLocations();
                 Log.d("####", "Right to left swipe detected on interaction region");
                 BusProvider.getInstance().post(produceRegionSwipeLeftEvent());
+                resetTimer();
             }
 
             @Override
             public void onLeftToRight() {
-                //Your code here
                 Log.d("####", "Left to right swipe detected on interaction region");
                 BusProvider.getInstance().post(produceRegionSwipeRightEvent());
+                resetTimer();
             }
 
             @Override
             public void onBottomToTop() {
-                //Your code here
                 Log.d("####", "Bottom to top swipe detected on interaction region");
             }
         });
@@ -384,6 +381,7 @@ public class GlobalTouchService extends Service {
                 @Override
                 public void run() {
                     resetLocations();
+                    disableControlInteraction();
                 }
             });
         }
