@@ -17,6 +17,9 @@ public class App extends Application {
     public float movementRate;
     public final long RESET_DELAY = 3000; // delay in ms before resetting indicators
 
+    public int swipeLengHorizontal;
+    public int swipeLengVertical;
+
     private App() {
 
         /* dimension variables */
@@ -28,6 +31,10 @@ public class App extends Application {
         thumbSize = 131;
 
         movementRate = 2.0f;
+
+        swipeLengHorizontal = 150;
+        swipeLengVertical = 50;
+
     }
 
 
@@ -40,7 +47,9 @@ public class App extends Application {
 
     public static enum SwipeDirection {
         Left,
-        Right;
+        Right,
+        Up,
+        Down;
 
     }
 }

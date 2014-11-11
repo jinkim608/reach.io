@@ -5,6 +5,14 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import io.reach.reachiodemo.R;
 
@@ -13,6 +21,7 @@ import io.reach.reachiodemo.R;
  */
 public class SecondFragment extends android.support.v4.app.Fragment {
     Activity mActivity;
+    private List<Map<String, Object>> data;
 
     @Override
     public void onAttach(Activity act) {
@@ -30,6 +39,36 @@ public class SecondFragment extends android.support.v4.app.Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_second, container, false);
 
+
+        List<String> arr = new ArrayList<String>();
+
+        //List of Items
+        String[] name_of_bookmarks = {
+                "Germany",
+                "Argentina",
+                "Netherlands",
+                "Brazil",
+                "Colombia",
+                "Belgium",
+                "France",
+                "Costa Rica"
+        };
+
+        //Create your List object for the ArrayAdapter
+        //and make it the same size as name_of_books
+        List<String> listBookmarks = new ArrayList<String>(Array.getLength(name_of_bookmarks));
+
+        //Add name_of_bookmarks contents to listBookmarks
+        Collections.addAll(listBookmarks, name_of_bookmarks);
+
+        //Create an ArrayAdapter passing it the Context, a generic list item and your list
+        //An alternative to "this" would be "getApplicationContext()" from your main activity
+        //or "getActivity()" from a fragment. "getBaseContext()" is not recommended.
+        ArrayAdapter arrayAdapter = new ArrayAdapter(getActivity(), android.R.layout.simple_list_item_1, listBookmarks);
+
+        //Set the adapter to your ListView
+        ListView lvSoccer = (ListView) view.findViewById(R.id.lv_soccer);
+        lvSoccer.setAdapter(arrayAdapter);
 
         return view;
     }

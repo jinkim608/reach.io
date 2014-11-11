@@ -27,8 +27,10 @@ import java.util.TimerTask;
 
 import io.reach.reachiodemo.bus.BusProvider;
 import io.reach.reachiodemo.bus.RegionClickEvent;
+import io.reach.reachiodemo.bus.RegionSwipeDownEvent;
 import io.reach.reachiodemo.bus.RegionSwipeLeftEvent;
 import io.reach.reachiodemo.bus.RegionSwipeRightEvent;
+import io.reach.reachiodemo.bus.RegionSwipeUpEvent;
 import io.reach.reachiodemo.interaction.OnFlingGestureListener;
 
 public class GlobalTouchService extends Service {
@@ -214,6 +216,8 @@ public class GlobalTouchService extends Service {
             @Override
             public void onTopToBottom() {
                 Log.d("####", "Top to bottom swipe detected on interaction region");
+                BusProvider.getInstance().post(produceRegionSwipeDownEvent());
+                resetTimer();
             }
 
             @Override
@@ -233,6 +237,8 @@ public class GlobalTouchService extends Service {
             @Override
             public void onBottomToTop() {
                 Log.d("####", "Bottom to top swipe detected on interaction region");
+                BusProvider.getInstance().post(produceRegionSwipeUpEvent());
+                resetTimer();
             }
         });
 
@@ -268,7 +274,6 @@ public class GlobalTouchService extends Service {
             // destroy mParentView
 
             if (mParentView != null) mWindowManager.removeView(mParentView);
-
         }
 
         if (timer != null) {
@@ -370,6 +375,16 @@ public class GlobalTouchService extends Service {
     @Produce
     public RegionSwipeRightEvent produceRegionSwipeRightEvent() {
         return new RegionSwipeRightEvent(sX, sY);
+    }
+
+    @Produce
+    public RegionSwipeUpEvent produceRegionSwipeUpEvent() {
+        return new RegionSwipeUpEvent(sX, sY);
+    }
+
+    @Produce
+    public RegionSwipeDownEvent produceRegionSwipeDownEvent() {
+        return new RegionSwipeDownEvent(sX, sY);
     }
 
     /* timer task to reset indicator locations */

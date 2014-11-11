@@ -26,8 +26,10 @@ import com.squareup.otto.Subscribe;
 import io.reach.reachiodemo.App.SwipeDirection;
 import io.reach.reachiodemo.bus.BusProvider;
 import io.reach.reachiodemo.bus.RegionClickEvent;
+import io.reach.reachiodemo.bus.RegionSwipeDownEvent;
 import io.reach.reachiodemo.bus.RegionSwipeLeftEvent;
 import io.reach.reachiodemo.bus.RegionSwipeRightEvent;
+import io.reach.reachiodemo.bus.RegionSwipeUpEvent;
 import io.reach.reachiodemo.bus.TestButtonClickedEvent;
 import io.reach.reachiodemo.ui.TabsPagerAdapter;
 
@@ -41,10 +43,13 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     private TabsPagerAdapter mAdapter;
     private static boolean serviceRunning = false;
 
+    private App app;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        app = App.getInstance();
         globalService = new Intent(this, GlobalTouchService.class);
 
         viewPager = (ViewPager) findViewById(R.id.pager);
@@ -202,12 +207,23 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         simulateSwipe(event.sX, event.sY, SwipeDirection.Right);
     }
 
+    @Subscribe
+    public void onRegionSwipeUpEvent(RegionSwipeUpEvent event) {
+        simulateSwipe(event.sX, event.sY, SwipeDirection.Up);
+    }
+
+    @Subscribe
+    public void onRegionSwipeDownEvent(RegionSwipeDownEvent event) {
+        simulateSwipe(event.sX, event.sY, SwipeDirection.Down);
+    }
+
+
     /* simulate swipe gesture at the x, y location to the direction passed in */
     private void simulateSwipe(int eX, int eY, SwipeDirection direction) {
 
+        // #### SWIPE LEFT
         if (direction == SwipeDirection.Left) {
-            // swipe to the left
-            Log.d("####", "swipe at (" + eX + ", " + eY + ") to: LEFT");
+            Log.d("####", "Swipe LEFT");
 
             long downTime = SystemClock.uptimeMillis();
 //            long eventTime = SystemClock.uptimeMillis() + 100;
@@ -227,7 +243,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                     downTime,
                     SystemClock.uptimeMillis(),
                     MotionEvent.ACTION_MOVE,
-                    eX - 150,   //Swipe left
+                    eX - app.swipeLengHorizontal,   //Swipe left
                     eY,
                     metaState
             );
@@ -237,16 +253,17 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                     downTime,
                     SystemClock.uptimeMillis() + 1000,
                     MotionEvent.ACTION_UP,
-                    eX - 150,
+                    eX - app.swipeLengHorizontal,
                     eY,
                     metaState
             );
             dispatchTouchEvent(motionEvent_Up);
 
 
-        } else {
-            // swipe to the right
-            Log.d("####", "swipe at (" + eX + ", " + eY + ") to: RIGHT");
+            // #### SWIPE RIGHT
+
+        } else if (direction == SwipeDirection.Right) {
+            Log.d("####", "Swipe RIGHT");
 
             long downTime = SystemClock.uptimeMillis();
 //            long eventTime = SystemClock.uptimeMillis() + 100;
@@ -266,7 +283,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                     downTime,
                     SystemClock.uptimeMillis(),
                     MotionEvent.ACTION_MOVE,
-                    eX + 150,   //Swipe left
+                    eX + app.swipeLengHorizontal,   //Swipe left
                     eY,
                     metaState
             );
@@ -276,8 +293,87 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                     downTime,
                     SystemClock.uptimeMillis() + 1000,
                     MotionEvent.ACTION_UP,
-                    eX + 150,
+                    eX + app.swipeLengHorizontal,
                     eY,
+                    metaState
+            );
+            dispatchTouchEvent(motionEvent_Up);
+
+            // #### SWIPE UP
+
+        } else if (direction == SwipeDirection.Up) {
+            Log.d("####", "Swipe UP");
+
+            long downTime = SystemClock.uptimeMillis();
+//            long eventTime = SystemClock.uptimeMillis() + 100;
+
+            int metaState = 0;
+            MotionEvent motionEvent_Down = MotionEvent.obtain(
+                    downTime,
+                    SystemClock.uptimeMillis(),
+                    MotionEvent.ACTION_DOWN,
+                    eX,
+                    eY,
+                    metaState
+            );
+            dispatchTouchEvent(motionEvent_Down);
+
+            MotionEvent motionEvent_Move = MotionEvent.obtain(
+                    downTime,
+                    SystemClock.uptimeMillis(),
+                    MotionEvent.ACTION_MOVE,
+                    eX,   //Swipe up
+                    eY - app.swipeLengVertical,
+                    metaState
+            );
+            dispatchTouchEvent(motionEvent_Move);
+
+            MotionEvent motionEvent_Up = MotionEvent.obtain(
+                    downTime,
+                    SystemClock.uptimeMillis() + 3000,
+                    MotionEvent.ACTION_UP,
+                    eX,
+                    eY - app.swipeLengVertical,
+                    metaState
+            );
+            dispatchTouchEvent(motionEvent_Up);
+
+            // #### SWIPE DOWN
+
+        } else if (direction == SwipeDirection.Down) {
+            // swipe to the top
+            Log.d("####", "Swipe DOWN");
+
+            long downTime = SystemClock.uptimeMillis();
+//            long eventTime = SystemClock.uptimeMillis() + 100;
+
+            int metaState = 0;
+            MotionEvent motionEvent_Down = MotionEvent.obtain(
+                    downTime,
+                    SystemClock.uptimeMillis(),
+                    MotionEvent.ACTION_DOWN,
+                    eX,
+                    eY,
+                    metaState
+            );
+            dispatchTouchEvent(motionEvent_Down);
+
+            MotionEvent motionEvent_Move = MotionEvent.obtain(
+                    downTime,
+                    SystemClock.uptimeMillis(),
+                    MotionEvent.ACTION_MOVE,
+                    eX,   //Swipe down
+                    eY + app.swipeLengVertical,
+                    metaState
+            );
+            dispatchTouchEvent(motionEvent_Move);
+
+            MotionEvent motionEvent_Up = MotionEvent.obtain(
+                    downTime,
+                    SystemClock.uptimeMillis() + 3000,
+                    MotionEvent.ACTION_UP,
+                    eX,
+                    eY + app.swipeLengVertical,
                     metaState
             );
             dispatchTouchEvent(motionEvent_Up);
