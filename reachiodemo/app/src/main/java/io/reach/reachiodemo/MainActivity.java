@@ -26,6 +26,7 @@ import com.squareup.otto.Subscribe;
 import io.reach.reachiodemo.App.SwipeDirection;
 import io.reach.reachiodemo.bus.BusProvider;
 import io.reach.reachiodemo.bus.RegionClickEvent;
+import io.reach.reachiodemo.bus.RegionMotionEvent;
 import io.reach.reachiodemo.bus.RegionSwipeDownEvent;
 import io.reach.reachiodemo.bus.RegionSwipeLeftEvent;
 import io.reach.reachiodemo.bus.RegionSwipeRightEvent;
@@ -97,6 +98,9 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                     }
                 });
 
+        if (!isServiceRunning(GlobalTouchService.class)) {
+            startService(globalService);
+        }
     }
 
     @Override
@@ -195,6 +199,12 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
         //click released
         dispatchTouchEvent(motionEvent_UP);
+    }
+
+    @Subscribe
+    public void onRegionMotionEvent(RegionMotionEvent event) {
+//        simulateSwipe(event.tX, event.tY, SwipeDirection.Left);
+        Log.d("####", "ACTION MOVE: " + event.tX + ", " + event.tY);
     }
 
     @Subscribe

@@ -27,11 +27,11 @@ import java.util.TimerTask;
 
 import io.reach.reachiodemo.bus.BusProvider;
 import io.reach.reachiodemo.bus.RegionClickEvent;
+import io.reach.reachiodemo.bus.RegionMotionEvent;
 import io.reach.reachiodemo.bus.RegionSwipeDownEvent;
 import io.reach.reachiodemo.bus.RegionSwipeLeftEvent;
 import io.reach.reachiodemo.bus.RegionSwipeRightEvent;
 import io.reach.reachiodemo.bus.RegionSwipeUpEvent;
-import io.reach.reachiodemo.interaction.OnFlingGestureListener;
 
 public class GlobalTouchService extends Service {
 
@@ -104,7 +104,7 @@ public class GlobalTouchService extends Service {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
-                Log.d("####", "rawY: " + event.getRawY() + ",\t controlY: " + cY);
+//                Log.d("####", "rawY: " + event.getRawY() + ",\t controlY: " + cY);
 
                 tX = (int) event.getRawX();
                 tY = (int) event.getRawY();
@@ -114,10 +114,11 @@ public class GlobalTouchService extends Service {
 
                 /* update selector location with 2 * the vector from anchor point to touch point */
 
-                if (event.getAction() == MotionEvent.ACTION_MOVE) {
-                    // Log.d("####", "onTouch -- dx: " + dx + ",\t dy: " + dy);
-                    // Log.d("####", "x: " + event.getX() + ",\t y: " + event.getY());
-                }
+//                if (event.getAction() == MotionEvent.ACTION_MOVE) {
+//
+//                    // Log.d("####", "onTouch -- dx: " + dx + ",\t dy: " + dy);
+//                    // Log.d("####", "x: " + event.getX() + ",\t y: " + event.getY());
+//                }
                 updateIndicatorLocations();
 
                 //TODO: Determine when to enable and disable interaction
@@ -212,35 +213,47 @@ public class GlobalTouchService extends Service {
             }
         });
 
-        ivThumbIndicator.setOnTouchListener(new OnFlingGestureListener() {
+        ivThumbIndicator.setOnTouchListener(new OnTouchListener() {
             @Override
-            public void onTopToBottom() {
-                Log.d("####", "Top to bottom swipe detected on interaction region");
-                BusProvider.getInstance().post(produceRegionSwipeDownEvent());
-                resetTimer();
-            }
+            public boolean onTouch(View v, MotionEvent event) {
 
-            @Override
-            public void onRightToLeft() {
-                Log.d("####", "Right to left swipe detected on interaction region");
-                BusProvider.getInstance().post(produceRegionSwipeLeftEvent());
-                resetTimer();
-            }
-
-            @Override
-            public void onLeftToRight() {
-                Log.d("####", "Left to right swipe detected on interaction region");
-                BusProvider.getInstance().post(produceRegionSwipeRightEvent());
-                resetTimer();
-            }
-
-            @Override
-            public void onBottomToTop() {
-                Log.d("####", "Bottom to top swipe detected on interaction region");
-                BusProvider.getInstance().post(produceRegionSwipeUpEvent());
-                resetTimer();
+                if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                    BusProvider.getInstance().post(new RegionMotionEvent(sX, sY, event.getAction()));
+                    resetTimer();
+                }
+                return false;
             }
         });
+
+//        ivThumbIndicator.setOnTouchListener(new OnFlingGestureListener() {
+//            @Override
+//            public void onTopToBottom() {
+//                Log.d("####", "Top to bottom swipe detected on interaction region");
+//                BusProvider.getInstance().post(produceRegionSwipeDownEvent());
+//                resetTimer();
+//            }
+//
+//            @Override
+//            public void onRightToLeft() {
+//                Log.d("####", "Right to left swipe detected on interaction region");
+//                BusProvider.getInstance().post(produceRegionSwipeLeftEvent());
+//                resetTimer();
+//            }
+//
+//            @Override
+//            public void onLeftToRight() {
+//                Log.d("####", "Left to right swipe detected on interaction region");
+//                BusProvider.getInstance().post(produceRegionSwipeRightEvent());
+//                resetTimer();
+//            }
+//
+//            @Override
+//            public void onBottomToTop() {
+//                Log.d("####", "Bottom to top swipe detected on interaction region");
+//                BusProvider.getInstance().post(produceRegionSwipeUpEvent());
+//                resetTimer();
+//            }
+//        });
 
     }
 

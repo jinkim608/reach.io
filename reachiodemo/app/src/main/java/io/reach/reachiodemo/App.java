@@ -33,7 +33,7 @@ public class App extends Application {
         movementRate = 2.0f;
 
         swipeLengHorizontal = 150;
-        swipeLengVertical = 50;
+        swipeLengVertical = 80;
 
     }
 
