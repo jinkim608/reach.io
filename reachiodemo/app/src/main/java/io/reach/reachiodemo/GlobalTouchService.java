@@ -16,6 +16,7 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.view.animation.ScaleAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -72,6 +73,8 @@ public class GlobalTouchService extends Service {
     private Timer timer;
     private TimerTask timerTask;
 
+    private Animation clickAnimation;
+
     @Override
     public IBinder onBind(Intent arg0) {
         return null;
@@ -94,6 +97,8 @@ public class GlobalTouchService extends Service {
         mParentView = new FrameLayout(this);
 
         initLocations();
+
+        initAnimations();
 
         // initialize image view for anchor and selector
         ivAnchor = new ImageView(this);
@@ -206,9 +211,10 @@ public class GlobalTouchService extends Service {
 
                 // trigger click animation
 
-                Animation clickAnimation = new ScaleAnimation(1.0f, 0.2f, 1.0f, 0.2f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-                clickAnimation.setDuration(200);
-                clickAnimation.setFillAfter(false);
+//                Animation clickAnimation = new ScaleAnimation(1.0f, 0.2f, 1.0f, 0.2f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+//                clickAnimation.setDuration(200);
+//                clickAnimation.setFillAfter(false);
+
                 ivSelector.startAnimation(clickAnimation);
             }
         });
@@ -373,6 +379,28 @@ public class GlobalTouchService extends Service {
 
 
         updateIndicatorLocations();
+    }
+
+    // Initialize animations
+    private void initAnimations() {
+        clickAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.click);
+        final Animation clickEndAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.click_end);
+        clickAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                ivSelector.startAnimation(clickEndAnimation);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
     }
 
     @Produce
