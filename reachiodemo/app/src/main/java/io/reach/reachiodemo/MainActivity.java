@@ -204,7 +204,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     @Subscribe
     public void onRegionMotionEvent(RegionMotionEvent event) {
 //        simulateSwipe(event.tX, event.tY, SwipeDirection.Left);
-        Log.d("####", "ACTION MOVE: " + event.tX + ", " + event.tY);
+        Log.d("####", "ACTION MOVE: " + event.sX + ", " + event.sY);
     }
 
     @Subscribe

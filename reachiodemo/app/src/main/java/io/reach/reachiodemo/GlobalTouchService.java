@@ -1,6 +1,7 @@
 package io.reach.reachiodemo;
 
 import android.app.Service;
+import android.content.ClipData;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -9,6 +10,7 @@ import android.os.IBinder;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Display;
+import android.view.DragEvent;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,7 +19,6 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.ScaleAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
@@ -45,6 +46,8 @@ public class GlobalTouchService extends Service {
     private ImageView ivAnchor;
     private ImageView ivSelector;
     private ImageView ivThumbIndicator;
+
+    private View dropAnchor;
 
     public Point size;
 
@@ -100,6 +103,57 @@ public class GlobalTouchService extends Service {
 
         initAnimations();
 
+        setupAnchorDropRegion();
+
+        setupSelector();
+
+        setupThumbIndicator();
+        setupAnchor();
+
+    }
+
+    private void setupThumbIndicator() {
+        ivThumbIndicator = new ImageView(this);
+
+        ivThumbIndicator.setImageDrawable(getResources().getDrawable(R.drawable.thumb_01));
+        FrameLayout.LayoutParams thumbParams = new FrameLayout.LayoutParams(app.thumbSize, app.thumbSize);
+        ivThumbIndicator.setLayoutParams(thumbParams);
+
+        /* layout param for thumb indicator */
+        WindowManager.LayoutParams tParams = new WindowManager.LayoutParams(
+                app.thumbSize, app.thumbSize, tX - (thumbSize / 2), tY - (thumbSize / 2) - actionBarHeight / 2,
+                WindowManager.LayoutParams.TYPE_PHONE, // Type Ohone, These are non-application windows providing user interaction with the phone (in particular incoming calls).
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, // this window won't ever get key input focus
+                PixelFormat.TRANSLUCENT);
+        tParams.gravity = Gravity.LEFT | Gravity.TOP;
+
+        mWindowManager.addView(ivThumbIndicator, tParams);
+    }
+
+    private void setupSelector() {
+        ivSelector = new ImageView(this);
+
+        ivSelector.setImageDrawable(getResources().getDrawable(R.drawable.thumb_02));
+        FrameLayout.LayoutParams earthParams = new FrameLayout.LayoutParams(app.selectorSize, app.selectorSize);
+        ivSelector.setLayoutParams(earthParams);
+
+        /* layout param for selector */
+        WindowManager.LayoutParams eParams = new WindowManager.LayoutParams(
+                selectorSize, selectorSize, sX - (selectorSize / 2), sY - (selectorSize / 2) - actionBarHeight / 2,
+                WindowManager.LayoutParams.TYPE_PHONE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT);
+
+        eParams.gravity = Gravity.LEFT | Gravity.TOP;
+
+//        mWindowManager.addView(ivSelector, eParams);
+
+        //Add ImageView inside the parent ViewGroup
+        mWindowManager.addView(mParentView, eParams);
+        mParentView.addView(ivSelector);
+    }
+
+    private void setupAnchor() {
         // initialize image view for anchor and selector
         ivAnchor = new ImageView(this);
         ivAnchor.setImageDrawable(getResources().getDrawable(R.drawable.thumb_03));
@@ -133,58 +187,21 @@ public class GlobalTouchService extends Service {
                     resetTimer();
                     Log.d("TouchTest", "Touch up");
                 }
-
-
-                return true;
+                return false;
             }
-
-
         });
 
-//        FrameLayout fl = new FrameLayout(this);
-//        WindowManager.LayoutParams fParams = new WindowManager.LayoutParams(
-//                WindowManager.LayoutParams.WRAP_CONTENT,
-//                WindowManager.LayoutParams.WRAP_CONTENT,
-//                WindowManager.LayoutParams.TYPE_PHONE,
-//                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-//                PixelFormat.TRANSLUCENT);
-//        fl.setLayoutParams(fParams);
-
-        ivSelector = new ImageView(this);
-
-        ivSelector.setImageDrawable(getResources().getDrawable(R.drawable.thumb_02));
-        FrameLayout.LayoutParams earthParams = new FrameLayout.LayoutParams(app.selectorSize, app.selectorSize);
-        ivSelector.setLayoutParams(earthParams);
-
-        ivThumbIndicator = new ImageView(this);
-        ivThumbIndicator.setImageDrawable(getResources().getDrawable(R.drawable.thumb_01));
-        FrameLayout.LayoutParams thumbParams = new FrameLayout.LayoutParams(app.thumbSize, app.thumbSize);
-        ivThumbIndicator.setLayoutParams(thumbParams);
-
-        /* layout param for selector */
-        WindowManager.LayoutParams eParams = new WindowManager.LayoutParams(
-                selectorSize, selectorSize, sX - (selectorSize / 2), sY - (selectorSize / 2) - actionBarHeight / 2,
-                WindowManager.LayoutParams.TYPE_PHONE,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSLUCENT);
-
-        eParams.gravity = Gravity.LEFT | Gravity.TOP;
-
-//        mWindowManager.addView(ivSelector, eParams);
-
-        //Add ImageView inside the parent ViewGroup
-        mWindowManager.addView(mParentView, eParams);
-        mParentView.addView(ivSelector);
-
-        /* layout param for thumb indicator */
-        WindowManager.LayoutParams tParams = new WindowManager.LayoutParams(
-                app.thumbSize, app.thumbSize, tX - (thumbSize / 2), tY - (thumbSize / 2) - actionBarHeight / 2,
-                WindowManager.LayoutParams.TYPE_PHONE, // Type Ohone, These are non-application windows providing user interaction with the phone (in particular incoming calls).
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, // this window won't ever get key input focus
-                PixelFormat.TRANSLUCENT);
-        tParams.gravity = Gravity.LEFT | Gravity.TOP;
-
-        mWindowManager.addView(ivThumbIndicator, tParams);
+        ivAnchor.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View view) {
+                Log.d("####", "LONG CLICK");
+                ClipData data = ClipData.newPlainText("", "");
+                View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
+                view.startDrag(data, shadowBuilder, view, 0);
+                view.setVisibility(View.INVISIBLE);
+                return false;
+            }
+        });
 
         /* layout param for anchor */
         WindowManager.LayoutParams mParams = new WindowManager.LayoutParams(
@@ -195,6 +212,57 @@ public class GlobalTouchService extends Service {
         mParams.gravity = Gravity.LEFT | Gravity.TOP;
 
         mWindowManager.addView(ivAnchor, mParams);
+    }
+
+    /* set up the region where anchor can be drag-and-dropped */
+    private void setupAnchorDropRegion() {
+
+        /* layout param for dropAnchor */
+        WindowManager.LayoutParams dlParams = new WindowManager.LayoutParams(
+                WindowManager.LayoutParams.MATCH_PARENT, 200, 0, 0,
+                WindowManager.LayoutParams.TYPE_PHONE, // Type Ohone, These are non-application windows providing user interaction with the phone (in particular incoming calls).
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, // this window won't ever get key input focus
+                PixelFormat.TRANSLUCENT);
+        dlParams.gravity = Gravity.BOTTOM;
+
+        dropAnchor = new View(this);
+
+//        dropAnchor.setBackgroundColor(Color.parseColor("CYAN"));
+
+        dropAnchor.setLayoutParams(dlParams);
+        dropAnchor.setClickable(false);
+        mWindowManager.addView(dropAnchor, dlParams);
+
+        dropAnchor.setOnDragListener(new View.OnDragListener() {
+            @Override
+            public boolean onDrag(View v, DragEvent event) {
+                switch (event.getAction()) {
+                    case DragEvent.ACTION_DRAG_STARTED:
+                        // do nothing
+                        break;
+                    case DragEvent.ACTION_DRAG_ENTERED:
+                        break;
+                    case DragEvent.ACTION_DRAG_EXITED:
+                        break;
+                    case DragEvent.ACTION_DROP:
+
+                        Log.d("####", "DROP ON: " + event.getX() + ", " + event.getY());
+
+                        // Dropped, reassign View to ViewGroup
+//                        View view = (View) event.getLocalState();
+//                        ViewGroup owner = (ViewGroup) view.getParent();
+//                        owner.removeView(view);
+//                        LinearLayout container = (LinearLayout) v;
+//                        container.addView(view);
+//                        view.setVisibility(View.VISIBLE);
+                        break;
+                    case DragEvent.ACTION_DRAG_ENDED:
+                    default:
+                        break;
+                }
+                return true;
+            }
+        });
     }
 
     private void enableControlInteraction() {
@@ -263,6 +331,7 @@ public class GlobalTouchService extends Service {
 
     }
 
+    // reset timer for resetting indicator locations
     private void resetTimer() {
         if (timer != null) {
             timer.cancel();
@@ -388,7 +457,6 @@ public class GlobalTouchService extends Service {
         clickAnimation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-
             }
 
             @Override
@@ -398,7 +466,6 @@ public class GlobalTouchService extends Service {
 
             @Override
             public void onAnimationRepeat(Animation animation) {
-
             }
         });
     }
