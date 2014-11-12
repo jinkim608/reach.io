@@ -42,7 +42,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     private ViewPager viewPager;
     private ActionBar actionBar;
     private TabsPagerAdapter mAdapter;
-    private static boolean serviceRunning = false;
 
     private App app;
 
@@ -80,7 +79,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
             }
         };
 
-        // Add 3 tabs, specifying the tab's text and TabListener
+        // Add 2 tabs, specifying the tab's text and TabListener
         for (int i = 0; i < 2; i++) {
             actionBar.addTab(
                     actionBar.newTab()
@@ -121,18 +120,14 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         // Handle presses on the action bar items
         switch (item.getItemId()) {
             case R.id.action_service:
-                //TODO
                 if (!isServiceRunning(GlobalTouchService.class)) {
                     Toast.makeText(this, "Start Service", Toast.LENGTH_SHORT).show();
                     startService(globalService);
-//                    serviceRunning = true;
                     item.setIcon(R.drawable.stop);
-
 
                 } else {
                     Toast.makeText(this, "Stop Service", Toast.LENGTH_SHORT).show();
                     stopService(globalService);
-//                    serviceRunning = false;
                     item.setIcon(R.drawable.start);
                 }
 
@@ -178,12 +173,6 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                 y,
                 metaState
         );
-
-        Log.d("####", "Simulating Touch at: " + x + ", " + y + " @ " + downTime);
-//        View v = findViewById(android.R.id.content).getRootView();
-//        v.dispatchTouchEvent(motionEvent);
-//        boolean dispatched = mCurrentActivity.dispatchTouchEvent(motionEvent);
-//        Log.d("####", String.valueOf(dispatched));
 
         //click
         dispatchTouchEvent(motionEvent);
@@ -446,5 +435,4 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         }
         return false;
     }
-
 }

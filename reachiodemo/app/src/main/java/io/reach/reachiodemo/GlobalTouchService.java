@@ -22,18 +22,12 @@ import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import com.squareup.otto.Produce;
-
 import java.util.Timer;
 import java.util.TimerTask;
 
 import io.reach.reachiodemo.bus.BusProvider;
 import io.reach.reachiodemo.bus.RegionClickEvent;
 import io.reach.reachiodemo.bus.RegionMotionEvent;
-import io.reach.reachiodemo.bus.RegionSwipeDownEvent;
-import io.reach.reachiodemo.bus.RegionSwipeLeftEvent;
-import io.reach.reachiodemo.bus.RegionSwipeRightEvent;
-import io.reach.reachiodemo.bus.RegionSwipeUpEvent;
 
 public class GlobalTouchService extends Service {
 
@@ -103,10 +97,11 @@ public class GlobalTouchService extends Service {
 
         initAnimations();
 
+        // TODO: separate left and right anchor drop region
+        // TODO: display them only while dragging the anchor
         setupAnchorDropRegion();
 
         setupSelector();
-
         setupThumbIndicator();
         setupAnchor();
 
@@ -275,7 +270,8 @@ public class GlobalTouchService extends Service {
                 Log.d("####", "Click detected on interaction region");
                 resetTimer();
 
-                BusProvider.getInstance().post(produceRegionClickEvent());
+//                BusProvider.getInstance().post(produceRegionClickEvent());
+                BusProvider.getInstance().post(new RegionClickEvent(sX, sY));
 
                 // trigger click animation
 
@@ -303,28 +299,28 @@ public class GlobalTouchService extends Service {
 //            @Override
 //            public void onTopToBottom() {
 //                Log.d("####", "Top to bottom swipe detected on interaction region");
-//                BusProvider.getInstance().post(produceRegionSwipeDownEvent());
+//                BusProvider.getInstance().post(new RegionSwipeDownEvent(sX, sY));
 //                resetTimer();
 //            }
 //
 //            @Override
 //            public void onRightToLeft() {
 //                Log.d("####", "Right to left swipe detected on interaction region");
-//                BusProvider.getInstance().post(produceRegionSwipeLeftEvent());
+//                BusProvider.getInstance().post(new RegionSwipeLeftEvent(sX, sY));
 //                resetTimer();
 //            }
 //
 //            @Override
 //            public void onLeftToRight() {
 //                Log.d("####", "Left to right swipe detected on interaction region");
-//                BusProvider.getInstance().post(produceRegionSwipeRightEvent());
+//                BusProvider.getInstance().post(new RegionSwipeRightEvent(sX, sY));
 //                resetTimer();
 //            }
 //
 //            @Override
 //            public void onBottomToTop() {
 //                Log.d("####", "Bottom to top swipe detected on interaction region");
-//                BusProvider.getInstance().post(produceRegionSwipeUpEvent());
+//                BusProvider.getInstance().post(new RegionSwipeUpEvent(sX, sY));
 //                resetTimer();
 //            }
 //        });
@@ -355,21 +351,16 @@ public class GlobalTouchService extends Service {
         BusProvider.getInstance().unregister(this);
 
         if (mWindowManager != null) {
-//            if (ivSelector != null) mWindowManager.removeView(ivSelector);
             if (ivAnchor != null) mWindowManager.removeView(ivAnchor);
-            if (ivAnchor != null) mWindowManager.removeView(ivThumbIndicator);
-
-            // destroy mParentView
-
+            if (ivThumbIndicator != null) mWindowManager.removeView(ivThumbIndicator);
+            if (ivSelector != null) mParentView.removeView(ivSelector);
             if (mParentView != null) mWindowManager.removeView(mParentView);
         }
 
         if (timer != null) {
             timer.cancel();
         }
-
     }
-
 
     private void updateIndicatorLocations() {
 
@@ -385,7 +376,6 @@ public class GlobalTouchService extends Service {
 
         //Update mParentView
         mWindowManager.updateViewLayout(mParentView, mParams);
-
 
         /* update thumb location indicator */
         WindowManager.LayoutParams tParams = new WindowManager.LayoutParams(
@@ -446,7 +436,6 @@ public class GlobalTouchService extends Service {
         sX = cX;
         sY = cY;
 
-
         updateIndicatorLocations();
     }
 
@@ -468,31 +457,6 @@ public class GlobalTouchService extends Service {
             public void onAnimationRepeat(Animation animation) {
             }
         });
-    }
-
-    @Produce
-    public RegionClickEvent produceRegionClickEvent() {
-        return new RegionClickEvent(sX, sY);
-    }
-
-    @Produce
-    public RegionSwipeLeftEvent produceRegionSwipeLeftEvent() {
-        return new RegionSwipeLeftEvent(sX, sY);
-    }
-
-    @Produce
-    public RegionSwipeRightEvent produceRegionSwipeRightEvent() {
-        return new RegionSwipeRightEvent(sX, sY);
-    }
-
-    @Produce
-    public RegionSwipeUpEvent produceRegionSwipeUpEvent() {
-        return new RegionSwipeUpEvent(sX, sY);
-    }
-
-    @Produce
-    public RegionSwipeDownEvent produceRegionSwipeDownEvent() {
-        return new RegionSwipeDownEvent(sX, sY);
     }
 
     /* timer task to reset indicator locations */
