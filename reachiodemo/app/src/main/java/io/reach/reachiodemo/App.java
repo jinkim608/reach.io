@@ -14,8 +14,11 @@ public class App extends Application {
     public int anchorOuterMargin;
     public int selectorSize;
     public int thumbSize;
+    public int dropRegionSize;
+
     public float movementRate;
-    public final long RESET_DELAY = 3000; // delay in ms before resetting indicators
+    public final long RESET_DELAY = 2200; // delay in ms before resetting indicators
+    public final long LONGCLICK_DELAY = 1000; // threshold in ms before long click trigger
 
     public int swipeLengHorizontal;
     public int swipeLengVertical;
@@ -26,6 +29,9 @@ public class App extends Application {
         anchorSize = 155;
         anchorOuterMargin = 20;
 
+        // include invisible padding size for drop event
+        dropRegionSize = anchorSize + anchorOuterMargin * 2 + 100;
+
         selectorSize = 101;
 
         thumbSize = 131;
@@ -34,9 +40,7 @@ public class App extends Application {
 
         swipeLengHorizontal = 150;
         swipeLengVertical = 80;
-
     }
-
 
     public static App getInstance() {
         if (mInstance == null) {
@@ -50,6 +54,5 @@ public class App extends Application {
         Right,
         Up,
         Down;
-
     }
 }

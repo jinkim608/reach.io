@@ -41,7 +41,8 @@ public class GlobalTouchService extends Service {
     private ImageView ivSelector;
     private ImageView ivThumbIndicator;
 
-    private View dropAnchor;
+    private ImageView ivDropLeft;
+    private ImageView ivDropRight;
 
     public Point size;
 
@@ -72,6 +73,8 @@ public class GlobalTouchService extends Service {
 
     private Animation clickAnimation;
 
+    private static boolean isLongClicked = false;
+
     @Override
     public IBinder onBind(Intent arg0) {
         return null;
@@ -93,21 +96,22 @@ public class GlobalTouchService extends Service {
         // initialize parent ViewGroup
         mParentView = new FrameLayout(this);
 
-        initLocations();
+        initLocations(true);
 
         initAnimations();
 
         // TODO: separate left and right anchor drop region
         // TODO: display them only while dragging the anchor
-        setupAnchorDropRegion();
 
         setupSelector();
         setupThumbIndicator();
-        setupAnchor();
+        setupAnchorDropRegion();
 
+        setupAnchor();
     }
 
     private void setupThumbIndicator() {
+        removeThumbIndicator();
         ivThumbIndicator = new ImageView(this);
 
         ivThumbIndicator.setImageDrawable(getResources().getDrawable(R.drawable.thumb_01));
@@ -126,8 +130,8 @@ public class GlobalTouchService extends Service {
     }
 
     private void setupSelector() {
+        removeSelector();
         ivSelector = new ImageView(this);
-
         ivSelector.setImageDrawable(getResources().getDrawable(R.drawable.thumb_02));
         FrameLayout.LayoutParams earthParams = new FrameLayout.LayoutParams(app.selectorSize, app.selectorSize);
         ivSelector.setLayoutParams(earthParams);
@@ -150,53 +154,71 @@ public class GlobalTouchService extends Service {
 
     private void setupAnchor() {
         // initialize image view for anchor and selector
+        removeAnchor();
         ivAnchor = new ImageView(this);
         ivAnchor.setImageDrawable(getResources().getDrawable(R.drawable.thumb_03));
         FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(anchorSize, anchorSize);
         ivAnchor.setLayoutParams(params);
+
+        final Handler handler = new Handler();
+        final Runnable mLongPressed = new Runnable() {
+            public void run() {
+                Log.i("", "Long press!");
+                anchorOnLongClick(ivAnchor);
+            }
+        };
+
         ivAnchor.setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()) {
 
-//                Log.d("####", "rawY: " + event.getRawY() + ",\t controlY: " + cY);
+                    case MotionEvent.ACTION_DOWN:
+                        Log.d("####", "ACTION DOWN");
+                        // trigger long press event after the delay
+                        handler.postDelayed(mLongPressed, app.LONGCLICK_DELAY);
 
-                tX = (int) event.getRawX();
-                tY = (int) event.getRawY();
+                        tX = (int) event.getRawX();
+                        tY = (int) event.getRawY();
 
-                sX = (int) (tX + (tX - cX) * (movementRate - 1));
-                sY = (int) (tY + (tY - cY) * (movementRate - 1));
+                        sX = (int) (tX + (tX - cX) * (movementRate - 1));
+                        sY = (int) (tY + (tY - cY) * (movementRate - 1));
 
-                /* update selector location with 2 * the vector from anchor point to touch point */
+                        updateIndicatorLocations();
 
-//                if (event.getAction() == MotionEvent.ACTION_MOVE) {
-//
-//                    // Log.d("####", "onTouch -- dx: " + dx + ",\t dy: " + dy);
-//                    // Log.d("####", "x: " + event.getX() + ",\t y: " + event.getY());
-//                }
-                updateIndicatorLocations();
+                        break;
 
-                //TODO: Determine when to enable and disable interaction
-                enableControlInteraction();
+                    case MotionEvent.ACTION_MOVE:
 
-                if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
-                    resetTimer();
-                    Log.d("TouchTest", "Touch up");
+                        handler.removeCallbacks(mLongPressed);
+
+                        Log.d("####", "ACTION MOVE");
+                        tX = (int) event.getRawX();
+                        tY = (int) event.getRawY();
+
+                        sX = (int) (tX + (tX - cX) * (movementRate - 1));
+                        sY = (int) (tY + (tY - cY) * (movementRate - 1));
+
+                        updateIndicatorLocations();
+
+                        //TODO: Determine when to enable and disable interaction
+                        enableControlInteraction();
+
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+                        Log.d("####", "ACTION UP, long click: " + isLongClicked);
+                        handler.removeCallbacks(mLongPressed);
+                        resetTimer();
+
+                    default:
+                        return false;
                 }
+
                 return false;
             }
         });
 
-        ivAnchor.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View view) {
-                Log.d("####", "LONG CLICK");
-                ClipData data = ClipData.newPlainText("", "");
-                View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
-                view.startDrag(data, shadowBuilder, view, 0);
-                view.setVisibility(View.INVISIBLE);
-                return false;
-            }
-        });
 
         /* layout param for anchor */
         WindowManager.LayoutParams mParams = new WindowManager.LayoutParams(
@@ -209,39 +231,140 @@ public class GlobalTouchService extends Service {
         mWindowManager.addView(ivAnchor, mParams);
     }
 
-    /* set up the region where anchor can be drag-and-dropped */
-    private void setupAnchorDropRegion() {
+    private void anchorOnLongClick(View view) {
+        isLongClicked = true;
 
-        /* layout param for dropAnchor */
-        WindowManager.LayoutParams dlParams = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.MATCH_PARENT, 200, 0, 0,
+        Log.d("####", "LONG CLICK");
+        removeSelector();
+        removeThumbIndicator();
+
+        showAnchorDropRegion();
+
+        // TODO: display two drop anchor regions
+
+        ClipData data = ClipData.newPlainText("", "");
+        View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
+        view.startDrag(data, shadowBuilder, null, 0);
+//        view.setVisibility(View.INVISIBLE);
+//        return true;
+    }
+
+
+    private void hideDropRegion() {
+        if (ivDropLeft != null) {
+            try {
+                mWindowManager.removeView(ivDropLeft);
+            } catch (Exception e) {
+            }
+        }
+        if (ivDropRight != null) {
+            try {
+                mWindowManager.removeView(ivDropRight);
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    private void showAnchorDropRegion() {
+         /* setup drop region images */
+        WindowManager.LayoutParams dropRegionParmas = new WindowManager.LayoutParams(
+                app.dropRegionSize, app.dropRegionSize, 0, 0,
                 WindowManager.LayoutParams.TYPE_PHONE, // Type Ohone, These are non-application windows providing user interaction with the phone (in particular incoming calls).
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, // this window won't ever get key input focus
                 PixelFormat.TRANSLUCENT);
-        dlParams.gravity = Gravity.BOTTOM;
+        dropRegionParmas.gravity = Gravity.BOTTOM | Gravity.LEFT;
+        mWindowManager.addView(ivDropLeft, dropRegionParmas);
 
-        dropAnchor = new View(this);
+        dropRegionParmas.gravity = Gravity.BOTTOM | Gravity.RIGHT;
+        mWindowManager.addView(ivDropRight, dropRegionParmas);
+    }
 
-//        dropAnchor.setBackgroundColor(Color.parseColor("CYAN"));
-
-        dropAnchor.setLayoutParams(dlParams);
-        dropAnchor.setClickable(false);
-        mWindowManager.addView(dropAnchor, dlParams);
-
-        dropAnchor.setOnDragListener(new View.OnDragListener() {
+    /* set up the region where anchor can be drag-and-dropped */
+    private void setupAnchorDropRegion() {
+        ivDropLeft = new ImageView(this);
+        ivDropLeft.setImageDrawable(getResources().getDrawable(R.drawable.dropregion_normal));
+        ivDropLeft.setPadding(0, 100, 100, 0);
+        ivDropLeft.setOnDragListener(new View.OnDragListener() {
             @Override
             public boolean onDrag(View v, DragEvent event) {
+                Log.d("####", "onDrag");
                 switch (event.getAction()) {
+
                     case DragEvent.ACTION_DRAG_STARTED:
                         // do nothing
-                        break;
+                        return true;
                     case DragEvent.ACTION_DRAG_ENTERED:
+                        Log.d("####", "DRAG_ENTERED");
                         break;
                     case DragEvent.ACTION_DRAG_EXITED:
+                        Log.d("####", "DRAG_EXITED");
+                        ivDropLeft.setImageDrawable(getResources().getDrawable(R.drawable.dropregion_normal));
                         break;
                     case DragEvent.ACTION_DROP:
 
                         Log.d("####", "DROP ON: " + event.getX() + ", " + event.getY());
+                        // TODO: remove drop region
+                        hideDropRegion();
+                        // initialize indicator locations to the left
+                        initLocations(true);
+
+//                        mWindowManager.removeView(mParentView);
+                        setupSelector();
+//                        mWindowManager.removeView(ivThumbIndicator);
+                        setupThumbIndicator();
+//                        mWindowManager.removeView(ivAnchor);
+                        setupAnchor();
+
+                        // TODO: change tX, tY, re-render indicators
+
+                        // Dropped, reassign View to ViewGroup
+//                        View view = (View) event.getLocalState();
+//                        ViewGroup owner = (ViewGroup) view.getParent();
+//                        owner.removeView(view);
+//                        LinearLayout container = (LinearLayout) v;
+//                        container.addView(view);
+//                        view.setVisibility(View.VISIBLE);
+                        break;
+                    case DragEvent.ACTION_DRAG_ENDED:
+                    default:
+                        break;
+                }
+                return true;
+            }
+        });
+
+        ivDropRight = new ImageView(this);
+        ivDropRight.setImageDrawable(getResources().getDrawable(R.drawable.dropregion_normal));
+        ivDropRight.setPadding(100, 100, 0, 0);
+        ivDropRight.setOnDragListener(new View.OnDragListener() {
+            @Override
+            public boolean onDrag(View v, DragEvent event) {
+                Log.d("####", "onDrag");
+                switch (event.getAction()) {
+
+                    case DragEvent.ACTION_DRAG_STARTED:
+                        // do nothing
+                        return true;
+                    case DragEvent.ACTION_DRAG_ENTERED:
+                        Log.d("####", "DRAG_ENTERED");
+                        break;
+                    case DragEvent.ACTION_DRAG_EXITED:
+                        Log.d("####", "DRAG_EXITED");
+                        ivDropLeft.setImageDrawable(getResources().getDrawable(R.drawable.dropregion_normal));
+                        break;
+                    case DragEvent.ACTION_DROP:
+
+                        Log.d("####", "DROP ON: " + event.getX() + ", " + event.getY());
+                        // TODO: remove drop region
+                        hideDropRegion();
+                        // initialize indicator locations to the right
+                        initLocations(false);
+
+                        setupSelector();
+                        setupThumbIndicator();
+                        setupAnchor();
+
+                        // TODO: change tX, tY, re-render indicators
 
                         // Dropped, reassign View to ViewGroup
 //                        View view = (View) event.getLocalState();
@@ -351,14 +474,48 @@ public class GlobalTouchService extends Service {
         BusProvider.getInstance().unregister(this);
 
         if (mWindowManager != null) {
-            if (ivAnchor != null) mWindowManager.removeView(ivAnchor);
-            if (ivThumbIndicator != null) mWindowManager.removeView(ivThumbIndicator);
-            if (ivSelector != null) mParentView.removeView(ivSelector);
-            if (mParentView != null) mWindowManager.removeView(mParentView);
+            removeSelector();
+            removeThumbIndicator();
+            removeAnchor();
+            hideDropRegion();
         }
 
         if (timer != null) {
             timer.cancel();
+        }
+    }
+
+    private void removeAnchor() {
+        if (ivAnchor != null) {
+            try {
+                mWindowManager.removeView(ivAnchor);
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    private void removeThumbIndicator() {
+        if (ivThumbIndicator != null) {
+            try {
+                mWindowManager.removeView(ivThumbIndicator);
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    private void removeSelector() {
+
+        if (ivSelector != null) {
+            try {
+                mParentView.removeView(ivSelector);
+            } catch (Exception e) {
+            }
+        }
+        if (mParentView != null) {
+            try {
+                mWindowManager.removeView(mParentView);
+            } catch (Exception e) {
+            }
         }
     }
 
@@ -375,7 +532,10 @@ public class GlobalTouchService extends Service {
 //        mWindowManager.updateViewLayout(ivSelector, mParams);
 
         //Update mParentView
-        mWindowManager.updateViewLayout(mParentView, mParams);
+        try {
+            mWindowManager.updateViewLayout(mParentView, mParams);
+        } catch (Exception e) {
+        }
 
         /* update thumb location indicator */
         WindowManager.LayoutParams tParams = new WindowManager.LayoutParams(
@@ -385,12 +545,14 @@ public class GlobalTouchService extends Service {
                 PixelFormat.TRANSLUCENT);
         tParams.gravity = Gravity.LEFT | Gravity.TOP;
         tParams.windowAnimations = android.R.style.Animation_Translucent;
-
-        mWindowManager.updateViewLayout(ivThumbIndicator, tParams);
+        try {
+            mWindowManager.updateViewLayout(ivThumbIndicator, tParams);
+        } catch (Exception e) {
+        }
     }
 
     /* Place anchor, thumbIndicator, and selector at the initial component location */
-    private void initLocations() {
+    private void initLocations(boolean isLeft) {
 
         // get screen dimension in px
         size = new Point();
@@ -408,9 +570,13 @@ public class GlobalTouchService extends Service {
         movementRate = app.movementRate;
         anchorOuterMargin = app.anchorOuterMargin;
 
-        cX = anchorOuterMargin + anchorSize / 2;
-        cY = size.y - anchorOuterMargin - anchorSize / 2;
+        if (isLeft) {
+            cX = anchorOuterMargin + anchorSize / 2;
+        } else {
+            cX = size.x - anchorOuterMargin - anchorSize / 2;
+        }
 
+        cY = size.y - anchorOuterMargin - anchorSize / 2;
         tX = cX;
         tY = cY;
 
