@@ -26,7 +26,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import io.reach.reachiodemo.bus.BusProvider;
-import io.reach.reachiodemo.bus.RegionClickEvent;
 import io.reach.reachiodemo.bus.RegionMotionEvent;
 
 /**
@@ -369,17 +368,6 @@ public class GlobalTouchService extends Service {
     private void enableControlInteraction() {
 
         // TODO: Send detected event to MainActivity
-
-        ivThumbIndicator.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d("####", "Click detected on interaction region");
-                resetTimer(); // if there is interaction, reset the timer for anchor reset
-                BusProvider.getInstance().post(new RegionClickEvent(sX, sY));
-                ivSelector.startAnimation(clickAnimation);
-            }
-        });
-
         ivThumbIndicator.setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -399,37 +387,6 @@ public class GlobalTouchService extends Service {
                 return false;
             }
         });
-
-//        ivThumbIndicator.setOnTouchListener(new OnFlingGestureListener() {
-//            @Override
-//            public void onTopToBottom() {
-//                Log.d("####", "Top to bottom swipe detected on interaction region");
-//                BusProvider.getInstance().post(new RegionSwipeDownEvent(sX, sY));
-//                resetTimer();
-//            }
-//
-//            @Override
-//            public void onRightToLeft() {
-//                Log.d("####", "Right to left swipe detected on interaction region");
-//                BusProvider.getInstance().post(new RegionSwipeLeftEvent(sX, sY));
-//                resetTimer();
-//            }
-//
-//            @Override
-//            public void onLeftToRight() {
-//                Log.d("####", "Left to right swipe detected on interaction region");
-//                BusProvider.getInstance().post(new RegionSwipeRightEvent(sX, sY));
-//                resetTimer();
-//            }
-//
-//            @Override
-//            public void onBottomToTop() {
-//                Log.d("####", "Bottom to top swipe detected on interaction region");
-//                BusProvider.getInstance().post(new RegionSwipeUpEvent(sX, sY));
-//                resetTimer();
-//            }
-//        });
-
     }
 
     /* reset timer for resetting indicator locations */
@@ -445,7 +402,6 @@ public class GlobalTouchService extends Service {
 
     /* remove event listeners on thumb indicator */
     private void disableControlInteraction() {
-        ivThumbIndicator.setOnClickListener(null);
         ivThumbIndicator.setOnTouchListener(null);
     }
 
