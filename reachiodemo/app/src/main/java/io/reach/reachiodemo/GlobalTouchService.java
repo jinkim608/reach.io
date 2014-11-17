@@ -384,7 +384,15 @@ public class GlobalTouchService extends Service {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
-                if (event.getAction() == MotionEvent.ACTION_MOVE) {
+                // Calculate selector movement
+                tX = (int) event.getRawX();
+                tY = (int) event.getRawY();
+
+                sX = (int) (tX + (tX - cX) * (movementRate - 1));
+                sY = (int) (tY + (tY - cY) * (movementRate - 1));
+
+                // Send selector location and event type (UP, DOWN and MOVE)
+                if (event.getAction() == MotionEvent.ACTION_MOVE || event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_UP) {
                     BusProvider.getInstance().post(new RegionMotionEvent(sX, sY, event.getAction()));
                     resetTimer();
                 }

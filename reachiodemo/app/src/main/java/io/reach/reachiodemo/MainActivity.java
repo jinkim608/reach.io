@@ -153,7 +153,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     /* listen for RegionClickEvent */
     @Subscribe
     public void onRegionClickEvent(RegionClickEvent event) {
-        simulateClick(event.sX, event.sY);
+//        simulateClick(event.sX, event.sY);
     }
 
     /* simulate touch event at the location passed in */
@@ -193,8 +193,8 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     /* listen for RegionMotionEvent */
     @Subscribe
     public void onRegionMotionEvent(RegionMotionEvent event) {
-//        simulateSwipe(event.tX, event.tY, SwipeDirection.Left);
-        Log.d("####", "ACTION MOVE: " + event.sX + ", " + event.sY);
+        simulateMotionEvent(event.sX, event.sY, event.action);
+        Log.d("####", "ACTION MOVE: " + event.sX + ", " + event.sY + ", action: " + event.action);
     }
 
     /* listen for RegionSwipeLeftEvent */
@@ -219,6 +219,21 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
     @Subscribe
     public void onRegionSwipeDownEvent(RegionSwipeDownEvent event) {
         simulateSwipe(event.sX, event.sY, SwipeDirection.Down);
+    }
+
+    /* simulate motion event (click and swipe) */
+    private void simulateMotionEvent(int sX, int sY, int Action) {
+        long downTime = SystemClock.uptimeMillis();
+        int metaState = 0;
+        MotionEvent motionEvent = MotionEvent.obtain(
+                downTime,
+                SystemClock.uptimeMillis(),
+                Action,
+                sX,
+                sY,
+                metaState
+        );
+        dispatchTouchEvent(motionEvent);
     }
 
     /* simulate swipe gesture at the x, y location to the direction passed in */
