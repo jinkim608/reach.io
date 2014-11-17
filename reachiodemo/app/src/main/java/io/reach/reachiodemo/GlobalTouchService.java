@@ -29,6 +29,15 @@ import io.reach.reachiodemo.bus.BusProvider;
 import io.reach.reachiodemo.bus.RegionClickEvent;
 import io.reach.reachiodemo.bus.RegionMotionEvent;
 
+/**
+ * Created by Jinhyun Kim, Muzi Li
+ * https://github.com/jinkim608/reach.io
+ * <p/>
+ * Reference used: https://github.com/kpbird/android-global-touchevent
+ * <p/>
+ * Service that displays three indicators(anchor, thumb indicator, selector) and takes touch
+ * gesture user input
+ */
 public class GlobalTouchService extends Service {
 
     private WindowManager mWindowManager;
@@ -100,9 +109,6 @@ public class GlobalTouchService extends Service {
 
         initAnimations();
 
-        // TODO: separate left and right anchor drop region
-        // TODO: display them only while dragging the anchor
-
         setupSelector();
         setupThumbIndicator();
         setupAnchorDropRegion();
@@ -121,8 +127,10 @@ public class GlobalTouchService extends Service {
         /* layout param for thumb indicator */
         WindowManager.LayoutParams tParams = new WindowManager.LayoutParams(
                 app.thumbSize, app.thumbSize, tX - (thumbSize / 2), tY - (thumbSize / 2) - actionBarHeight / 2,
-                WindowManager.LayoutParams.TYPE_PHONE, // Type Ohone, These are non-application windows providing user interaction with the phone (in particular incoming calls).
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, // this window won't ever get key input focus
+                // These are non-application windows providing user interaction with the phone (in particular, incoming calls).
+                WindowManager.LayoutParams.TYPE_PHONE,
+                // this window won't ever get key input focus
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
         tParams.gravity = Gravity.LEFT | Gravity.TOP;
 
@@ -144,8 +152,6 @@ public class GlobalTouchService extends Service {
                 PixelFormat.TRANSLUCENT);
 
         eParams.gravity = Gravity.LEFT | Gravity.TOP;
-
-//        mWindowManager.addView(ivSelector, eParams);
 
         //Add ImageView inside the parent ViewGroup
         mWindowManager.addView(mParentView, eParams);
@@ -200,10 +206,7 @@ public class GlobalTouchService extends Service {
                         sY = (int) (tY + (tY - cY) * (movementRate - 1));
 
                         updateIndicatorLocations();
-
-                        //TODO: Determine when to enable and disable interaction
                         enableControlInteraction();
-
                         break;
 
                     case MotionEvent.ACTION_UP:
@@ -223,8 +226,8 @@ public class GlobalTouchService extends Service {
         /* layout param for anchor */
         WindowManager.LayoutParams mParams = new WindowManager.LayoutParams(
                 anchorSize, anchorSize, cX - (anchorSize / 2), cY - (anchorSize / 2) - actionBarHeight / 2,
-                WindowManager.LayoutParams.TYPE_PHONE, // Type Ohone, These are non-application windows providing user interaction with the phone (in particular incoming calls).
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, // this window won't ever get key input focus
+                WindowManager.LayoutParams.TYPE_PHONE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
         mParams.gravity = Gravity.LEFT | Gravity.TOP;
 
@@ -237,19 +240,15 @@ public class GlobalTouchService extends Service {
         Log.d("####", "LONG CLICK");
         removeSelector();
         removeThumbIndicator();
-
         showAnchorDropRegion();
-
-        // TODO: display two drop anchor regions
 
         ClipData data = ClipData.newPlainText("", "");
         View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
         view.startDrag(data, shadowBuilder, null, 0);
-//        view.setVisibility(View.INVISIBLE);
-//        return true;
     }
 
 
+    /* remove the views for left and right drop regions */
     private void hideDropRegion() {
         if (ivDropLeft != null) {
             try {
@@ -265,12 +264,12 @@ public class GlobalTouchService extends Service {
         }
     }
 
+    /* display anchor drop region left and right */
     private void showAnchorDropRegion() {
-         /* setup drop region images */
         WindowManager.LayoutParams dropRegionParmas = new WindowManager.LayoutParams(
                 app.dropRegionSize, app.dropRegionSize, 0, 0,
-                WindowManager.LayoutParams.TYPE_PHONE, // Type Ohone, These are non-application windows providing user interaction with the phone (in particular incoming calls).
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, // this window won't ever get key input focus
+                WindowManager.LayoutParams.TYPE_PHONE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
         dropRegionParmas.gravity = Gravity.BOTTOM | Gravity.LEFT;
         mWindowManager.addView(ivDropLeft, dropRegionParmas);
@@ -293,39 +292,30 @@ public class GlobalTouchService extends Service {
                     case DragEvent.ACTION_DRAG_STARTED:
                         // do nothing
                         return true;
+
                     case DragEvent.ACTION_DRAG_ENTERED:
                         Log.d("####", "DRAG_ENTERED");
                         break;
+
                     case DragEvent.ACTION_DRAG_EXITED:
                         Log.d("####", "DRAG_EXITED");
                         ivDropLeft.setImageDrawable(getResources().getDrawable(R.drawable.dropregion_normal));
                         break;
+
                     case DragEvent.ACTION_DROP:
 
                         Log.d("####", "DROP ON: " + event.getX() + ", " + event.getY());
-                        // TODO: remove drop region
                         hideDropRegion();
                         // initialize indicator locations to the left
                         initLocations(true);
 
-//                        mWindowManager.removeView(mParentView);
                         setupSelector();
-//                        mWindowManager.removeView(ivThumbIndicator);
                         setupThumbIndicator();
-//                        mWindowManager.removeView(ivAnchor);
                         setupAnchor();
-
-                        // TODO: change tX, tY, re-render indicators
-
-                        // Dropped, reassign View to ViewGroup
-//                        View view = (View) event.getLocalState();
-//                        ViewGroup owner = (ViewGroup) view.getParent();
-//                        owner.removeView(view);
-//                        LinearLayout container = (LinearLayout) v;
-//                        container.addView(view);
-//                        view.setVisibility(View.VISIBLE);
                         break;
+
                     case DragEvent.ACTION_DRAG_ENDED:
+
                     default:
                         break;
                 }
@@ -345,36 +335,28 @@ public class GlobalTouchService extends Service {
                     case DragEvent.ACTION_DRAG_STARTED:
                         // do nothing
                         return true;
+
                     case DragEvent.ACTION_DRAG_ENTERED:
                         Log.d("####", "DRAG_ENTERED");
                         break;
+
                     case DragEvent.ACTION_DRAG_EXITED:
                         Log.d("####", "DRAG_EXITED");
                         ivDropLeft.setImageDrawable(getResources().getDrawable(R.drawable.dropregion_normal));
                         break;
-                    case DragEvent.ACTION_DROP:
 
+                    case DragEvent.ACTION_DROP:
                         Log.d("####", "DROP ON: " + event.getX() + ", " + event.getY());
-                        // TODO: remove drop region
                         hideDropRegion();
                         // initialize indicator locations to the right
                         initLocations(false);
-
                         setupSelector();
                         setupThumbIndicator();
                         setupAnchor();
-
-                        // TODO: change tX, tY, re-render indicators
-
-                        // Dropped, reassign View to ViewGroup
-//                        View view = (View) event.getLocalState();
-//                        ViewGroup owner = (ViewGroup) view.getParent();
-//                        owner.removeView(view);
-//                        LinearLayout container = (LinearLayout) v;
-//                        container.addView(view);
-//                        view.setVisibility(View.VISIBLE);
                         break;
+
                     case DragEvent.ACTION_DRAG_ENDED:
+
                     default:
                         break;
                 }
@@ -383,6 +365,7 @@ public class GlobalTouchService extends Service {
         });
     }
 
+    /* attach event listeners on the thumb indicator after moving out of the anchor */
     private void enableControlInteraction() {
 
         // TODO: Send detected event to MainActivity
@@ -391,17 +374,8 @@ public class GlobalTouchService extends Service {
             @Override
             public void onClick(View v) {
                 Log.d("####", "Click detected on interaction region");
-                resetTimer();
-
-//                BusProvider.getInstance().post(produceRegionClickEvent());
+                resetTimer(); // if there is interaction, reset the timer for anchor reset
                 BusProvider.getInstance().post(new RegionClickEvent(sX, sY));
-
-                // trigger click animation
-
-//                Animation clickAnimation = new ScaleAnimation(1.0f, 0.2f, 1.0f, 0.2f, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-//                clickAnimation.setDuration(200);
-//                clickAnimation.setFillAfter(false);
-
                 ivSelector.startAnimation(clickAnimation);
             }
         });
@@ -450,7 +424,7 @@ public class GlobalTouchService extends Service {
 
     }
 
-    // reset timer for resetting indicator locations
+    /* reset timer for resetting indicator locations */
     private void resetTimer() {
         if (timer != null) {
             timer.cancel();
@@ -461,6 +435,7 @@ public class GlobalTouchService extends Service {
         timer.schedule(timerTask, app.RESET_DELAY);
     }
 
+    /* remove event listeners on thumb indicator */
     private void disableControlInteraction() {
         ivThumbIndicator.setOnClickListener(null);
         ivThumbIndicator.setOnTouchListener(null);
@@ -485,6 +460,7 @@ public class GlobalTouchService extends Service {
         }
     }
 
+    /* remove the image view for anchor from the window */
     private void removeAnchor() {
         if (ivAnchor != null) {
             try {
@@ -494,6 +470,7 @@ public class GlobalTouchService extends Service {
         }
     }
 
+    /* remove the image view for thumb indicator from the window */
     private void removeThumbIndicator() {
         if (ivThumbIndicator != null) {
             try {
@@ -503,6 +480,7 @@ public class GlobalTouchService extends Service {
         }
     }
 
+    /* remove the image view and view group for selector from the window */
     private void removeSelector() {
 
         if (ivSelector != null) {
@@ -519,6 +497,7 @@ public class GlobalTouchService extends Service {
         }
     }
 
+    /* update the location params for indicators and redraw */
     private void updateIndicatorLocations() {
 
         /* update the selector point according to the current touch location */
@@ -529,7 +508,6 @@ public class GlobalTouchService extends Service {
                 PixelFormat.TRANSLUCENT);
         mParams.gravity = Gravity.LEFT | Gravity.TOP;
         mParams.windowAnimations = android.R.style.Animation_Translucent;
-//        mWindowManager.updateViewLayout(ivSelector, mParams);
 
         //Update mParentView
         try {
@@ -584,6 +562,7 @@ public class GlobalTouchService extends Service {
         sY = cY;
     }
 
+    /* reset the locations of the three indicators to the starting position  */
     private void resetLocations() {
 
         Log.d("####", "Resetting indicator locations");
@@ -605,7 +584,7 @@ public class GlobalTouchService extends Service {
         updateIndicatorLocations();
     }
 
-    // Initialize animations
+    /* Initialize animations */
     private void initAnimations() {
         clickAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.click);
         final Animation clickEndAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.click_end);

@@ -20,7 +20,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 
 import io.reach.reachiodemo.App.SwipeDirection;
@@ -31,13 +30,19 @@ import io.reach.reachiodemo.bus.RegionSwipeDownEvent;
 import io.reach.reachiodemo.bus.RegionSwipeLeftEvent;
 import io.reach.reachiodemo.bus.RegionSwipeRightEvent;
 import io.reach.reachiodemo.bus.RegionSwipeUpEvent;
-import io.reach.reachiodemo.bus.TestButtonClickedEvent;
 import io.reach.reachiodemo.ui.TabsPagerAdapter;
 
+/**
+ * Created by Jinhyun Kim, Muzi Li
+ * https://github.com/jinkim608/reach.io
+ * <p/>
+ * MainActivity for this demo app. Displays swipeable tabs, a button, a list view and etc.,
+ * as well as simulates user input touch events at the selector location
+ */
 public class MainActivity extends FragmentActivity implements ActionBar.TabListener {
 
     Intent globalService;
-    private int counter = 0;    // Count number of clicks on target button
+    private int counter = 0; // Count number of clicks on target button
 
     private ViewPager viewPager;
     private ActionBar actionBar;
@@ -97,6 +102,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
                     }
                 });
 
+        // automatically start service in the beginning if not already running
         if (!isServiceRunning(GlobalTouchService.class)) {
             startService(globalService);
         }
@@ -117,7 +123,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle presses on the action bar items
+        // action bar item
         switch (item.getItemId()) {
             case R.id.action_service:
                 if (!isServiceRunning(GlobalTouchService.class)) {
@@ -138,25 +144,19 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         }
     }
 
+    // increment count on button click
     public void targetClicked(View v) {
         counter++;
         ((Button) v).setText(String.valueOf(counter));
     }
 
-    /*
-        Notify that the test button is clicked: MainAct --> Service
-     */
-    @Produce
-    public TestButtonClickedEvent produceTestButtonClickedEvent() {
-        return new TestButtonClickedEvent();
-    }
-
+    /* listen for RegionClickEvent */
     @Subscribe
     public void onRegionClickEvent(RegionClickEvent event) {
         simulateClick(event.sX, event.sY);
     }
 
-    // simulate touch event
+    /* simulate touch event at the location passed in */
     private void simulateClick(int eX, int eY) {
         long downTime = SystemClock.uptimeMillis();
         long eventTime = SystemClock.uptimeMillis() + 100;
@@ -190,32 +190,36 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         dispatchTouchEvent(motionEvent_UP);
     }
 
+    /* listen for RegionMotionEvent */
     @Subscribe
     public void onRegionMotionEvent(RegionMotionEvent event) {
 //        simulateSwipe(event.tX, event.tY, SwipeDirection.Left);
         Log.d("####", "ACTION MOVE: " + event.sX + ", " + event.sY);
     }
 
+    /* listen for RegionSwipeLeftEvent */
     @Subscribe
     public void onRegionSwipeLeftEvent(RegionSwipeLeftEvent event) {
         simulateSwipe(event.sX, event.sY, SwipeDirection.Left);
     }
 
+    /* listen for RegionSwipeRightEvent */
     @Subscribe
     public void onRegionSwipeRightEvent(RegionSwipeRightEvent event) {
         simulateSwipe(event.sX, event.sY, SwipeDirection.Right);
     }
 
+    /* listen for RegionSwipeUpEvent */
     @Subscribe
     public void onRegionSwipeUpEvent(RegionSwipeUpEvent event) {
         simulateSwipe(event.sX, event.sY, SwipeDirection.Up);
     }
 
+    /* listen for RegionSwipeDownEvent */
     @Subscribe
     public void onRegionSwipeDownEvent(RegionSwipeDownEvent event) {
         simulateSwipe(event.sX, event.sY, SwipeDirection.Down);
     }
-
 
     /* simulate swipe gesture at the x, y location to the direction passed in */
     private void simulateSwipe(int eX, int eY, SwipeDirection direction) {
@@ -426,6 +430,7 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
 
     }
 
+    /* check if service is running */
     private boolean isServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {

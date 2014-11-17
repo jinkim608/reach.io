@@ -5,10 +5,12 @@ import android.view.MotionEvent;
 import android.view.View;
 
 /**
- * Created by Jin on 11/2/14.
- *
- * Reference from:
- * http://illusionsandroid.blogspot.com/2011/05/adding-fling-gesture-listener-to-view.html
+ * Created by Jinhyun Kim, Muzi Li on 11/2/14
+ * https://github.com/jinkim608/reach.io
+ * <p/>
+ * Reference from: http://illusionsandroid.blogspot.com/2011/05/adding-fling-gesture-listener-to-view.html
+ * <p/>
+ * Gesture listener used to detect swipe motion events
  */
 public abstract class OnFlingGestureListener implements View.OnTouchListener {
 

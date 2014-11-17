@@ -3,10 +3,10 @@ package io.reach.reachiodemo;
 import android.app.Application;
 
 /**
- * Created by Jin on 10/30/14.
- * <p/>
- * Singleton App for Reach.io application
- * - holds global variables and app states
+ * Created by Jinhyun Kim, Muzi Li
+ * https://github.com/jinkim608/reach.io
+ *
+ * Singleton App for Reach.io application that holds global variables and app states
  */
 public class App extends Application {
     private static App mInstance = null;
