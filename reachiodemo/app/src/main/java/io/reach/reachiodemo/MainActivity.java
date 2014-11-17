@@ -22,13 +22,8 @@ import android.widget.Toast;
 
 import com.squareup.otto.Subscribe;
 
-import io.reach.reachiodemo.App.SwipeDirection;
 import io.reach.reachiodemo.bus.BusProvider;
 import io.reach.reachiodemo.bus.RegionMotionEvent;
-import io.reach.reachiodemo.bus.RegionSwipeDownEvent;
-import io.reach.reachiodemo.bus.RegionSwipeLeftEvent;
-import io.reach.reachiodemo.bus.RegionSwipeRightEvent;
-import io.reach.reachiodemo.bus.RegionSwipeUpEvent;
 import io.reach.reachiodemo.ui.TabsPagerAdapter;
 
 /**

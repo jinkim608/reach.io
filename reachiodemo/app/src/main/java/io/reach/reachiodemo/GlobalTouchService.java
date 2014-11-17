@@ -43,7 +43,8 @@ public class GlobalTouchService extends Service {
     private Display display;
 
     // parent view that contains ImageViews
-    private ViewGroup mParentView;
+    private ViewGroup vgSelector;
+    private ViewGroup vgThumbIndicator;
 
     private ImageView ivAnchor;
     private ImageView ivSelector;
@@ -80,6 +81,8 @@ public class GlobalTouchService extends Service {
     private TimerTask timerTask;
 
     private Animation clickAnimation;
+    private Animation animationFadeIn;
+    private Animation animationFadeOut;
 
     private static boolean isLongClicked = false;
 
@@ -102,7 +105,8 @@ public class GlobalTouchService extends Service {
         display = mWindowManager.getDefaultDisplay();
 
         // initialize parent ViewGroup
-        mParentView = new FrameLayout(this);
+        vgSelector = new FrameLayout(this);
+        vgThumbIndicator = new FrameLayout(this);
 
         initLocations(true);
 
@@ -133,7 +137,8 @@ public class GlobalTouchService extends Service {
                 PixelFormat.TRANSLUCENT);
         tParams.gravity = Gravity.LEFT | Gravity.TOP;
 
-        mWindowManager.addView(ivThumbIndicator, tParams);
+        vgThumbIndicator.addView(ivThumbIndicator);
+        mWindowManager.addView(vgThumbIndicator, tParams);
     }
 
     private void setupSelector() {
@@ -153,8 +158,8 @@ public class GlobalTouchService extends Service {
         eParams.gravity = Gravity.LEFT | Gravity.TOP;
 
         //Add ImageView inside the parent ViewGroup
-        mWindowManager.addView(mParentView, eParams);
-        mParentView.addView(ivSelector);
+        vgSelector.addView(ivSelector);
+        mWindowManager.addView(vgSelector, eParams);
     }
 
     private void setupAnchor() {
@@ -190,25 +195,26 @@ public class GlobalTouchService extends Service {
                         sY = (int) (tY + (tY - cY) * (movementRate - 1));
 
                         updateIndicatorLocations();
-
                         break;
 
                     case MotionEvent.ACTION_MOVE:
 
+                        // TODO: Determine if moved more than threshold
+                        // resetTimer();
                         handler.removeCallbacks(mLongPressed);
 
-                        Log.d("####", "ACTION MOVE");
                         tX = (int) event.getRawX();
                         tY = (int) event.getRawY();
+                        Log.d("####", "ACTION MOVE: (" + tX + ", " + tY + ")");
 
                         sX = (int) (tX + (tX - cX) * (movementRate - 1));
                         sY = (int) (tY + (tY - cY) * (movementRate - 1));
 
                         updateIndicatorLocations();
-                        enableControlInteraction();
                         break;
 
                     case MotionEvent.ACTION_UP:
+                        enableControlInteraction();
                         Log.d("####", "ACTION UP, long click: " + isLongClicked);
                         handler.removeCallbacks(mLongPressed);
                         resetTimer();
@@ -438,7 +444,13 @@ public class GlobalTouchService extends Service {
     private void removeThumbIndicator() {
         if (ivThumbIndicator != null) {
             try {
-                mWindowManager.removeView(ivThumbIndicator);
+                vgThumbIndicator.removeView(ivThumbIndicator);
+            } catch (Exception e) {
+            }
+        }
+        if (ivThumbIndicator != null) {
+            try {
+                mWindowManager.removeView(vgThumbIndicator);
             } catch (Exception e) {
             }
         }
@@ -449,13 +461,13 @@ public class GlobalTouchService extends Service {
 
         if (ivSelector != null) {
             try {
-                mParentView.removeView(ivSelector);
+                vgSelector.removeView(ivSelector);
             } catch (Exception e) {
             }
         }
-        if (mParentView != null) {
+        if (vgSelector != null) {
             try {
-                mWindowManager.removeView(mParentView);
+                mWindowManager.removeView(vgSelector);
             } catch (Exception e) {
             }
         }
@@ -473,9 +485,9 @@ public class GlobalTouchService extends Service {
         mParams.gravity = Gravity.LEFT | Gravity.TOP;
         mParams.windowAnimations = android.R.style.Animation_Translucent;
 
-        //Update mParentView
+        //Update vgSelector
         try {
-            mWindowManager.updateViewLayout(mParentView, mParams);
+            mWindowManager.updateViewLayout(vgSelector, mParams);
         } catch (Exception e) {
         }
 
@@ -488,7 +500,7 @@ public class GlobalTouchService extends Service {
         tParams.gravity = Gravity.LEFT | Gravity.TOP;
         tParams.windowAnimations = android.R.style.Animation_Translucent;
         try {
-            mWindowManager.updateViewLayout(ivThumbIndicator, tParams);
+            mWindowManager.updateViewLayout(vgThumbIndicator, tParams);
         } catch (Exception e) {
         }
     }
@@ -529,6 +541,10 @@ public class GlobalTouchService extends Service {
     /* reset the locations of the three indicators to the starting position  */
     private void resetLocations() {
 
+        ivSelector.startAnimation(animationFadeIn);
+        ivThumbIndicator.startAnimation(animationFadeIn);
+
+
         Log.d("####", "Resetting indicator locations");
 //        Animation moveRighttoLeft = new TranslateAnimation(tX, cX, tY, cY);
 //        moveRighttoLeft.setDuration(1000);
@@ -545,11 +561,33 @@ public class GlobalTouchService extends Service {
         sX = cX;
         sY = cY;
 
+
         updateIndicatorLocations();
     }
 
     /* Initialize animations */
     private void initAnimations() {
+
+        animationFadeOut = AnimationUtils.loadAnimation(this, R.anim.fadeout);
+        animationFadeOut.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+                ivSelector.startAnimation(animationFadeOut);
+                ivThumbIndicator.startAnimation(animationFadeOut);
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                resetLocations();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+            }
+        });
+
+        animationFadeIn = AnimationUtils.loadAnimation(this, R.anim.fadein);
+
         clickAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.click);
         final Animation clickEndAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.click_end);
         clickAnimation.setAnimationListener(new Animation.AnimationListener() {
@@ -576,7 +614,9 @@ public class GlobalTouchService extends Service {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    resetLocations();
+//                    resetLocations();
+                    ivSelector.startAnimation(animationFadeOut);
+                    ivThumbIndicator.startAnimation(animationFadeOut);
                     disableControlInteraction();
                 }
             });
