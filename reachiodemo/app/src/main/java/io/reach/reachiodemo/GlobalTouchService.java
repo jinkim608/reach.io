@@ -237,7 +237,6 @@ public class GlobalTouchService extends Service {
             }
         });
 
-
         /* layout param for anchor */
         WindowManager.LayoutParams mParams = new WindowManager.LayoutParams(
                 anchorSize, anchorSize, cX - (anchorSize / 2), cY - (anchorSize / 2) - actionBarHeight / 2,
