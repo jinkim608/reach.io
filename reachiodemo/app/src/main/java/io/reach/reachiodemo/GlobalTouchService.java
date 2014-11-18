@@ -83,6 +83,8 @@ public class GlobalTouchService extends Service {
     private TimerTask timerTask;
 
     private Animation clickAnimation;
+    private boolean clickDown = false;
+    private boolean clickUp = false;
 
     private Animation animationActionDown;
     private Animation animationActionUp;
@@ -380,13 +382,13 @@ public class GlobalTouchService extends Service {
 
     /* attach event listeners on the thumb indicator after moving out of the anchor */
     private void enableControlInteraction() {
-        vgThumbIndicator.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                resetTimer();
-                ivSelector.startAnimation(clickAnimation);
-            }
-        });
+//        vgThumbIndicator.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                resetTimer();
+//                ivSelector.startAnimation(clickAnimation);
+//            }
+//        });
 
         // Send detected event to MainActivity
         vgThumbIndicator.setOnTouchListener(new OnTouchListener() {
@@ -402,10 +404,14 @@ public class GlobalTouchService extends Service {
 
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
+                        Log.d("Thumb", "Action Down");
                         ivSelector.startAnimation(animationActionDown);
                         break;
                     case MotionEvent.ACTION_UP:
-                        ivSelector.startAnimation(animationActionUp);
+                        clickUp = true;
+                        Log.d("Thumb", "Action Up");
+                        if (clickDown == true)
+                            ivSelector.startAnimation(animationActionUp);
                         break;
                 };
 
@@ -603,25 +609,67 @@ public class GlobalTouchService extends Service {
 
         animationFadeIn = AnimationUtils.loadAnimation(this, R.anim.fadein);
 
-        clickAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.click);
-        final Animation clickEndAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.click_end);
-        clickAnimation.setAnimationListener(new Animation.AnimationListener() {
+//        clickAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.click);
+//        final Animation clickEndAnimation = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.click_end);
+//        clickAnimation.setAnimationListener(new Animation.AnimationListener() {
+//            @Override
+//            public void onAnimationStart(Animation animation) {
+//            }
+//
+//            @Override
+//            public void onAnimationEnd(Animation animation) {
+//                ivSelector.startAnimation(clickEndAnimation);
+//            }
+//
+//            @Override
+//            public void onAnimationRepeat(Animation animation) {
+//            }
+//        });
+
+
+        /* logic added to show full animations for both click and long tab */
+        animationActionDown = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.click);
+        animationActionUp = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.click_end);
+
+        animationActionDown.setFillEnabled(true);
+        animationActionDown.setFillAfter(true);
+        animationActionDown.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
+
             }
 
             @Override
             public void onAnimationEnd(Animation animation) {
-                ivSelector.startAnimation(clickEndAnimation);
+                if (clickUp == true) {
+                    ivSelector.startAnimation(animationActionUp);
+                }
+                clickDown = true;
             }
 
             @Override
             public void onAnimationRepeat(Animation animation) {
+
             }
         });
 
-        animationActionDown = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.click);
-        animationActionUp = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.click_end);
+        animationActionUp.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                clickUp = false;
+                clickDown = false;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
     }
 
     /* timer task to reset indicator locations */
