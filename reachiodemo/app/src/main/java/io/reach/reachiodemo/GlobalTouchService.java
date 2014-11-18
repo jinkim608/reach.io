@@ -86,8 +86,6 @@ public class GlobalTouchService extends Service {
     private Animation animationFadeIn;
     private Animation animationFadeOut;
 
-    private static boolean isLongClicked = false;
-
     @Override
     public IBinder onBind(Intent arg0) {
         return null;
@@ -249,8 +247,6 @@ public class GlobalTouchService extends Service {
     }
 
     private void anchorOnLongClick(View view) {
-        isLongClicked = true;
-
         Log.d("####", "LONG CLICK");
         removeSelector();
         removeThumbIndicator();
@@ -381,8 +377,15 @@ public class GlobalTouchService extends Service {
 
     /* attach event listeners on the thumb indicator after moving out of the anchor */
     private void enableControlInteraction() {
+        vgThumbIndicator.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resetTimer();
+                ivSelector.startAnimation(clickAnimation);
+            }
+        });
 
-        // TODO: Send detected event to MainActivity
+        // Send detected event to MainActivity
         vgThumbIndicator.setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
