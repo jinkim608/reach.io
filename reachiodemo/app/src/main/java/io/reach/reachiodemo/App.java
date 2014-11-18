@@ -5,7 +5,7 @@ import android.app.Application;
 /**
  * Created by Jinhyun Kim, Muzi Li
  * https://github.com/jinkim608/reach.io
- *
+ * <p/>
  * Singleton App for Reach.io application that holds global variables and app states
  */
 public class App extends Application {
@@ -17,11 +17,9 @@ public class App extends Application {
     public int dropRegionSize;
 
     public float movementRate;
-    public final long RESET_DELAY = 2200; // delay in ms before resetting indicators
+    public final long RESET_DELAY = 2000; // delay in ms before resetting indicators
     public final long LONGCLICK_DELAY = 1000; // threshold in ms before long click trigger
 
-    public int swipeLengHorizontal;
-    public int swipeLengVertical;
 
     private App() {
 
@@ -37,9 +35,6 @@ public class App extends Application {
         thumbSize = 131;
 
         movementRate = 2.0f;
-
-        swipeLengHorizontal = 150;
-        swipeLengVertical = 80;
     }
 
     public static App getInstance() {

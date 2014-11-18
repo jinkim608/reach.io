@@ -74,6 +74,8 @@ public class GlobalTouchService extends Service {
     public static int sX;
     public static int sY;
 
+    private float mX, mY; // x, y coord to determine if there is drag (movement)
+
     private App app;
 
     private Handler handler;
@@ -178,18 +180,22 @@ public class GlobalTouchService extends Service {
             }
         };
 
+
         ivAnchor.setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+
+                tX = (int) event.getRawX();
+                tY = (int) event.getRawY();
+
                 switch (event.getAction()) {
 
                     case MotionEvent.ACTION_DOWN:
+                        mX = tX; // update last X
+                        mY = tY; // update last Y
                         Log.d("####", "ACTION DOWN");
                         // trigger long press event after the delay
                         handler.postDelayed(mLongPressed, app.LONGCLICK_DELAY);
-
-                        tX = (int) event.getRawX();
-                        tY = (int) event.getRawY();
 
                         sX = (int) (tX + (tX - cX) * (movementRate - 1));
                         sY = (int) (tY + (tY - cY) * (movementRate - 1));
@@ -199,30 +205,33 @@ public class GlobalTouchService extends Service {
 
                     case MotionEvent.ACTION_MOVE:
 
-                        // TODO: Determine if moved more than threshold
-                        // resetTimer();
-                        handler.removeCallbacks(mLongPressed);
+                        // Determine if moved more than threshold
+                        if (tX != mX && tY != mY) {
+//                            Log.d("####", "ACTION MOVE: " + tX + ", " + tY);
 
-                        tX = (int) event.getRawX();
-                        tY = (int) event.getRawY();
-                        Log.d("####", "ACTION MOVE: (" + tX + ", " + tY + ")");
+                            sX = (int) (tX + (tX - cX) * (movementRate - 1));
+                            sY = (int) (tY + (tY - cY) * (movementRate - 1));
 
-                        sX = (int) (tX + (tX - cX) * (movementRate - 1));
-                        sY = (int) (tY + (tY - cY) * (movementRate - 1));
+                            updateIndicatorLocations();
+                            handler.removeCallbacks(mLongPressed);
 
-                        updateIndicatorLocations();
+                            if (timer != null) {
+                                timer.cancel();
+                            }
+                        }
+                        mX = tX; // update last X
+                        mY = tY; // update last Y
                         break;
 
                     case MotionEvent.ACTION_UP:
                         enableControlInteraction();
-                        Log.d("####", "ACTION UP, long click: " + isLongClicked);
+//                        Log.d("####", "ACTION UP, long click: " + isLongClicked);
                         handler.removeCallbacks(mLongPressed);
                         resetTimer();
 
                     default:
                         return false;
                 }
-
                 return false;
             }
         });
@@ -409,7 +418,7 @@ public class GlobalTouchService extends Service {
 
     /* remove event listeners on thumb indicator */
     private void disableControlInteraction() {
-        ivThumbIndicator.setOnTouchListener(null);
+        vgThumbIndicator.setOnTouchListener(null);
     }
 
     @Override
@@ -545,23 +554,13 @@ public class GlobalTouchService extends Service {
         ivSelector.startAnimation(animationFadeIn);
         ivThumbIndicator.startAnimation(animationFadeIn);
 
-
         Log.d("####", "Resetting indicator locations");
-//        Animation moveRighttoLeft = new TranslateAnimation(tX, cX, tY, cY);
-//        moveRighttoLeft.setDuration(1000);
-//
-//        AnimationSet animation = new AnimationSet(false);
-//        animation.addAnimation(moveRighttoLeft);
-
-//        ivThumbIndicator.setAnimation(animation);
-//        ivThumbIndicator.startAnimation(animation);
 
         tX = cX;
         tY = cY;
 
         sX = cX;
         sY = cY;
-
 
         updateIndicatorLocations();
     }
