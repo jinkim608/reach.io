@@ -83,6 +83,9 @@ public class GlobalTouchService extends Service {
     private TimerTask timerTask;
 
     private Animation clickAnimation;
+
+    private Animation animationActionDown;
+    private Animation animationActionUp;
     private Animation animationFadeIn;
     private Animation animationFadeOut;
 
@@ -397,6 +400,15 @@ public class GlobalTouchService extends Service {
                 sX = (int) (tX + (tX - cX) * (movementRate - 1));
                 sY = (int) (tY + (tY - cY) * (movementRate - 1));
 
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        ivSelector.startAnimation(animationActionDown);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        ivSelector.startAnimation(animationActionUp);
+                        break;
+                };
+
                 // Send selector location and event type (UP, DOWN and MOVE)
                 if (event.getAction() == MotionEvent.ACTION_MOVE || event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_UP) {
 //                    Log.d("####", "interaction ACTION: " + event.getAction());
@@ -607,6 +619,9 @@ public class GlobalTouchService extends Service {
             public void onAnimationRepeat(Animation animation) {
             }
         });
+
+        animationActionDown = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.click);
+        animationActionUp = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.click_end);
     }
 
     /* timer task to reset indicator locations */
