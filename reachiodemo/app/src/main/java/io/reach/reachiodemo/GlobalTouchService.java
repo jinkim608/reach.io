@@ -374,7 +374,7 @@ public class GlobalTouchService extends Service {
     private void enableControlInteraction() {
 
         // TODO: Send detected event to MainActivity
-        ivThumbIndicator.setOnTouchListener(new OnTouchListener() {
+        vgThumbIndicator.setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
@@ -387,6 +387,7 @@ public class GlobalTouchService extends Service {
 
                 // Send selector location and event type (UP, DOWN and MOVE)
                 if (event.getAction() == MotionEvent.ACTION_MOVE || event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_UP) {
+//                    Log.d("####", "interaction ACTION: " + event.getAction());
                     BusProvider.getInstance().post(new RegionMotionEvent(sX, sY, event.getAction()));
                     resetTimer();
                 }
