@@ -45,10 +45,16 @@ public class GlobalTouchService extends Service {
     // parent view that contains ImageViews
     private ViewGroup vgSelector;
     private ViewGroup vgThumbIndicator;
+    private ViewGroup vgSelectorSwipe;
+    private ViewGroup vgThumbIndicatorSwipe;
 
     private ImageView ivAnchor;
     private ImageView ivSelector;
     private ImageView ivThumbIndicator;
+
+    // image views of swipe indicators
+    private ImageView ivThumbIndicatorSwipe;
+    private ImageView ivSelectorSwipe;
 
     private ImageView ivDropLeft;
     private ImageView ivDropRight;
@@ -90,6 +96,8 @@ public class GlobalTouchService extends Service {
     private Animation animationActionUp;
     private Animation animationFadeIn;
     private Animation animationFadeOut;
+    private Animation animationSwipeBegin;
+    private Animation animationSwipeEnd;
 
     @Override
     public IBinder onBind(Intent arg0) {
@@ -112,6 +120,8 @@ public class GlobalTouchService extends Service {
         // initialize parent ViewGroup
         vgSelector = new FrameLayout(this);
         vgThumbIndicator = new FrameLayout(this);
+        vgThumbIndicatorSwipe = new FrameLayout(this);
+        vgSelectorSwipe = new FrameLayout(this);
 
         initLocations(true);
 
@@ -119,9 +129,53 @@ public class GlobalTouchService extends Service {
 
         setupSelector();
         setupThumbIndicator();
+
         setupAnchorDropRegion();
 
         setupAnchor();
+    }
+
+    private void setupThumbIndicatorOnSwipe() {
+        removeThumbIndicatorSwipe();
+        ivThumbIndicatorSwipe = new ImageView(this);
+
+        ivThumbIndicatorSwipe.setImageDrawable(getResources().getDrawable(R.drawable.thumb_swipe));
+        FrameLayout.LayoutParams thumbParams = new FrameLayout.LayoutParams(app.thumbSize, app.thumbSize);
+        ivThumbIndicatorSwipe.setLayoutParams(thumbParams);
+
+        /* layout param for thumb indicator */
+        WindowManager.LayoutParams tParams = new WindowManager.LayoutParams(
+                app.thumbSize, app.thumbSize, tX - (thumbSize / 2), tY - (thumbSize / 2) - actionBarHeight / 2,
+                // These are non-application windows providing user interaction with the phone (in particular, incoming calls).
+                WindowManager.LayoutParams.TYPE_PHONE,
+                // this window won't ever get key input focus
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT);
+        tParams.gravity = Gravity.LEFT | Gravity.TOP;
+
+        vgThumbIndicatorSwipe.addView(ivThumbIndicatorSwipe);
+        mWindowManager.addView(vgThumbIndicatorSwipe, tParams);
+    }
+
+    private void setupSelectorOnSwipe() {
+        removeSelectorSwipe();
+        ivSelectorSwipe = new ImageView(this);
+        ivSelectorSwipe.setImageDrawable(getResources().getDrawable(R.drawable.selector_swipe));
+        FrameLayout.LayoutParams thumbParams = new FrameLayout.LayoutParams(app.selectorSize, app.selectorSize);
+        ivSelectorSwipe.setLayoutParams(thumbParams);
+
+        /* layout param for thumb indicator */
+        WindowManager.LayoutParams tParams = new WindowManager.LayoutParams(
+                app.selectorSize, app.selectorSize, sX - (selectorSize / 2), sY - (selectorSize / 2) - actionBarHeight / 2,
+                // These are non-application windows providing user interaction with the phone (in particular, incoming calls).
+                WindowManager.LayoutParams.TYPE_PHONE,
+                // this window won't ever get key input focus
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT);
+        tParams.gravity = Gravity.LEFT | Gravity.TOP;
+
+        vgSelectorSwipe.addView(ivSelectorSwipe);
+        mWindowManager.addView(vgSelectorSwipe, tParams);
     }
 
     private void setupThumbIndicator() {
@@ -405,13 +459,24 @@ public class GlobalTouchService extends Service {
                     case MotionEvent.ACTION_DOWN:
                         Log.d("Thumb", "Action Down");
                         ivSelector.startAnimation(animationActionDown);
+                        setupThumbIndicatorOnSwipe();
+                        setupSelectorOnSwipe();
+                        ivThumbIndicatorSwipe.startAnimation(animationSwipeBegin);
+                        ivSelectorSwipe.startAnimation(animationSwipeBegin);
                         break;
                     case MotionEvent.ACTION_UP:
                         clickUp = true;
                         Log.d("Thumb", "Action Up");
                         if (clickDown == true)
                             ivSelector.startAnimation(animationActionUp);
+                        ivThumbIndicatorSwipe.startAnimation(animationSwipeEnd);
+                        ivSelectorSwipe.startAnimation(animationSwipeEnd);
+//                        removeThumbIndicatorSwipe();
+//                        removeSelectorSwipe();
                         break;
+                    case MotionEvent.ACTION_MOVE:
+                        updateIndicatorLocationsOnSwipe();
+
                 };
 
                 // Send selector location and event type (UP, DOWN and MOVE)
@@ -486,6 +551,37 @@ public class GlobalTouchService extends Service {
         }
     }
 
+    /* remove the image view and view group for thumb swipe indicator from the window when swipe ends */
+    private void removeThumbIndicatorSwipe() {
+        if (ivThumbIndicatorSwipe != null) {
+            try {
+                vgThumbIndicatorSwipe.removeView(ivThumbIndicatorSwipe);
+            } catch (Exception e) {
+            }
+        }
+        if (vgThumbIndicatorSwipe != null) {
+            try {
+                mWindowManager.removeView(vgThumbIndicatorSwipe);
+            } catch (Exception e) {}
+        }
+    }
+
+    /* remove the image view and view group for selector swipe indicator from the window when swipe ends */
+    private void removeSelectorSwipe() {
+        if (ivSelectorSwipe != null) {
+            try {
+                vgSelectorSwipe.removeView(ivSelectorSwipe);
+            } catch (Exception e) {
+
+            }
+        }
+        if (vgSelectorSwipe != null) {
+            try {
+                mWindowManager.removeView(vgSelectorSwipe);
+            } catch (Exception e) {}
+        }
+    }
+
     /* remove the image view and view group for selector from the window */
     private void removeSelector() {
 
@@ -500,6 +596,36 @@ public class GlobalTouchService extends Service {
                 mWindowManager.removeView(vgSelector);
             } catch (Exception e) {
             }
+        }
+    }
+
+    /* update the location params of swipe indicators and redraw */
+    private void updateIndicatorLocationsOnSwipe() {
+        /* update selector location for swipe*/
+        WindowManager.LayoutParams mParams = new WindowManager.LayoutParams(
+                selectorSize, selectorSize, sX - (selectorSize / 2), sY - (selectorSize / 2) - actionBarHeight / 2,
+                WindowManager.LayoutParams.TYPE_PHONE, // Type Ohone, These are non-application windows providing user interaction with the phone (in particular incoming calls).
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, // this window won't ever get key input focus
+                PixelFormat.TRANSLUCENT);
+        mParams.gravity = Gravity.LEFT | Gravity.TOP;
+        mParams.windowAnimations = android.R.style.Animation_Translucent;
+
+        try {
+            mWindowManager.updateViewLayout(vgSelectorSwipe, mParams);
+        } catch (Exception e) {
+        }
+
+        /* update thumb indicator location for swipe */
+        WindowManager.LayoutParams tParams = new WindowManager.LayoutParams(
+                thumbSize, thumbSize, tX - (thumbSize / 2), tY - (thumbSize / 2) - actionBarHeight / 2,
+                WindowManager.LayoutParams.TYPE_PHONE, // Type Ohone, These are non-application windows providing user interaction with the phone (in particular incoming calls).
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, // this window won't ever get key input focus
+                PixelFormat.TRANSLUCENT);
+        tParams.gravity = Gravity.LEFT | Gravity.TOP;
+        tParams.windowAnimations = android.R.style.Animation_Translucent;
+        try {
+            mWindowManager.updateViewLayout(vgThumbIndicatorSwipe, tParams);
+        } catch (Exception e) {
         }
     }
 
@@ -669,6 +795,28 @@ public class GlobalTouchService extends Service {
 
             }
         });
+
+        /* animations when swipe begins and ends */
+        animationSwipeBegin = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.swipe_begin);
+        animationSwipeEnd = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.swipe_end);
+        animationSwipeEnd.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                removeSelectorSwipe();
+                removeThumbIndicatorSwipe();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
     }
 
     /* timer task to reset indicator locations */
