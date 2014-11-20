@@ -88,7 +88,6 @@ public class GlobalTouchService extends Service {
     private Timer timer;
     private TimerTask timerTask;
 
-    private Animation clickAnimation;
     private boolean clickDown = false;
     private boolean clickUp = false;
 
@@ -435,18 +434,13 @@ public class GlobalTouchService extends Service {
 
     /* attach event listeners on the thumb indicator after moving out of the anchor */
     private void enableControlInteraction() {
-//        vgThumbIndicator.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                resetTimer();
-//                ivSelector.startAnimation(clickAnimation);
-//            }
-//        });
 
         // Send detected event to MainActivity
         vgThumbIndicator.setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+
+                cancelTimer();
 
                 // Calculate selector movement
                 tX = (int) event.getRawX();
@@ -463,7 +457,9 @@ public class GlobalTouchService extends Service {
                         setupSelectorOnSwipe();
                         ivThumbIndicatorSwipe.startAnimation(animationSwipeBegin);
                         ivSelectorSwipe.startAnimation(animationSwipeBegin);
+
                         break;
+
                     case MotionEvent.ACTION_UP:
                         clickUp = true;
                         Log.d("Thumb", "Action Up");
@@ -473,21 +469,30 @@ public class GlobalTouchService extends Service {
                         ivSelectorSwipe.startAnimation(animationSwipeEnd);
 //                        removeThumbIndicatorSwipe();
 //                        removeSelectorSwipe();
+                        resetTimer();
                         break;
+
                     case MotionEvent.ACTION_MOVE:
                         updateIndicatorLocationsOnSwipe();
+                        break;
 
-                };
+                }
 
                 // Send selector location and event type (UP, DOWN and MOVE)
                 if (event.getAction() == MotionEvent.ACTION_MOVE || event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_UP) {
-//                    Log.d("####", "interaction ACTION: " + event.getAction());
                     BusProvider.getInstance().post(new RegionMotionEvent(sX, sY, event.getAction()));
-                    resetTimer();
                 }
                 return false;
             }
         });
+    }
+
+    /* cancel timer if not null */
+    private void cancelTimer() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
     }
 
     /* reset timer for resetting indicator locations */
@@ -562,7 +567,8 @@ public class GlobalTouchService extends Service {
         if (vgThumbIndicatorSwipe != null) {
             try {
                 mWindowManager.removeView(vgThumbIndicatorSwipe);
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
     }
 
@@ -578,7 +584,8 @@ public class GlobalTouchService extends Service {
         if (vgSelectorSwipe != null) {
             try {
                 mWindowManager.removeView(vgSelectorSwipe);
-            } catch (Exception e) {}
+            } catch (Exception e) {
+            }
         }
     }
 
