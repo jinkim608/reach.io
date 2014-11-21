@@ -4,6 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <SeekBar
+        android:layout_margin="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:progressDrawable="@drawable/apptheme_scrubber_progress_horizontal_holo_light"
+        android:thumb="@drawable/apptheme_scrubber_control_selector_holo_light"
+        />
+
 
     <LinearLayout
         android:orientation="horizontal"
