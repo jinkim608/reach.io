@@ -1,12 +1,8 @@
 package io.reach.reachiodemo;
 
-import android.app.ActionBar;
 import android.app.ActivityManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.FragmentActivity;
@@ -33,13 +29,12 @@ import io.reach.reachiodemo.ui.TabsPagerAdapter;
  * MainActivity for this demo app. Displays swipeable tabs, a button, a list view and etc.,
  * as well as simulates user input touch events at the selector location
  */
-public class MainActivity extends FragmentActivity implements ActionBar.TabListener {
+public class MainActivity extends FragmentActivity {
 
     Intent globalService;
     private int counter = 0; // Count number of clicks on target button
 
     private ViewPager viewPager;
-    private ActionBar actionBar;
     private TabsPagerAdapter mAdapter;
 
     private App app;
@@ -58,43 +53,43 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         actionBar = getActionBar();
 
         // Specify that tabs should be displayed in the action bar.
-        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-
-        actionBar.setStackedBackgroundDrawable(new ColorDrawable(Color.parseColor("#243342")));
-
-        // Create a tab listener that is called when the user changes tabs.
-        ActionBar.TabListener tabListener = new ActionBar.TabListener() {
-            public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-                viewPager.setCurrentItem(tab.getPosition());
-                // show the given tab
-            }
-
-            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-                // hide the given tab
-            }
-
-            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
-                // probably ignore this event
-            }
-        };
-
-        // Add 2 tabs, specifying the tab's text and TabListener
-        for (int i = 0; i < 2; i++) {
-            actionBar.addTab(
-                    actionBar.newTab()
-                            .setText("Tab " + (i + 1))
-                            .setTabListener(tabListener));
-        }
-
-        viewPager.setOnPageChangeListener(
-                new ViewPager.SimpleOnPageChangeListener() {
-                    @Override
-                    public void onPageSelected(int position) {
-                        // When swiping between pages, select the
-                        // corresponding tab.
-                        getActionBar().setSelectedNavigationItem(position);
-                    }
-                });
+//        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
+//
+//        actionBar.setStackedBackgroundDrawable(new ColorDrawable(Color.parseColor("#243342")));
+//
+//        // Create a tab listener that is called when the user changes tabs.
+//        ActionBar.TabListener tabListener = new ActionBar.TabListener() {
+//            public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+//                viewPager.setCurrentItem(tab.getPosition());
+//                // show the given tab
+//            }
+//
+//            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+//                // hide the given tab
+//            }
+//
+//            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+//                // probably ignore this event
+//            }
+//        };
+//
+//        // Add 2 tabs, specifying the tab's text and TabListener
+//        for (int i = 0; i < 2; i++) {
+//            actionBar.addTab(
+//                    actionBar.newTab()
+//                            .setText("Tab " + (i + 1))
+//                            .setTabListener(tabListener));
+//        }
+//
+//        viewPager.setOnPageChangeListener(
+//                new ViewPager.SimpleOnPageChangeListener() {
+//                    @Override
+//                    public void onPageSelected(int position) {
+//                        // When swiping between pages, select the
+//                        // corresponding tab.
+////                        getActionBar().setSelectedNavigationItem(position);
+//                    }
+//                });
 
         // automatically start service in the beginning if not already running
         if (!isServiceRunning(GlobalTouchService.class)) {
@@ -188,37 +183,37 @@ public class MainActivity extends FragmentActivity implements ActionBar.TabListe
         // Always unregister when an object no longer should be on the bus.
         BusProvider.getInstance().unregister(this);
     }
-
-    @Override
-    public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-        viewPager.setCurrentItem(tab.getPosition());
-
-        viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-
-            @Override
-            public void onPageSelected(int position) {
-                actionBar.setSelectedNavigationItem(position);
-            }
-
-            @Override
-            public void onPageScrolled(int arg0, float arg1, int arg2) {
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int arg0) {
-            }
-        });
-    }
-
-    @Override
-    public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-
-    }
-
-    @Override
-    public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
-
-    }
+//
+//    @Override
+//    public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
+//        viewPager.setCurrentItem(tab.getPosition());
+//
+//        viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+//
+//            @Override
+//            public void onPageSelected(int position) {
+//                actionBar.setSelectedNavigationItem(position);
+//            }
+//
+//            @Override
+//            public void onPageScrolled(int arg0, float arg1, int arg2) {
+//            }
+//
+//            @Override
+//            public void onPageScrollStateChanged(int arg0) {
+//            }
+//        });
+//    }
+//
+//    @Override
+//    public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
+//
+//    }
+//
+//    @Override
+//    public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
+//
+//    }
 
     /* check if service is running */
     private boolean isServiceRunning(Class<?> serviceClass) {
