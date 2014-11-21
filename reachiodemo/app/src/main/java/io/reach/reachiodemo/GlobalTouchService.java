@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
@@ -97,6 +98,8 @@ public class GlobalTouchService extends Service {
     private Animation animationFadeOut;
     private Animation animationSwipeBegin;
     private Animation animationSwipeEnd;
+    private Animation animationCircleFadeOut;
+    private Animation animationCircleFadeIn;
 
     @Override
     public IBinder onBind(Intent arg0) {
@@ -435,6 +438,9 @@ public class GlobalTouchService extends Service {
     /* attach event listeners on the thumb indicator after moving out of the anchor */
     private void enableControlInteraction() {
 
+        ivSelector.startAnimation(animationCircleFadeOut);
+        ivThumbIndicator.startAnimation(animationCircleFadeOut);
+
         // Send detected event to MainActivity
         vgThumbIndicator.setOnTouchListener(new OnTouchListener() {
             @Override
@@ -452,10 +458,10 @@ public class GlobalTouchService extends Service {
                 switch (event.getAction()) {
                     case MotionEvent.ACTION_DOWN:
                         Log.d("Thumb", "Action Down");
-                        ivSelector.startAnimation(animationActionDown);
-                        setupThumbIndicatorOnSwipe();
+//                        ivSelector.startAnimation(animationActionDown);
+//                        setupThumbIndicatorOnSwipe();
                         setupSelectorOnSwipe();
-                        ivThumbIndicatorSwipe.startAnimation(animationSwipeBegin);
+//                        ivThumbIndicatorSwipe.startAnimation(animationSwipeBegin);
                         ivSelectorSwipe.startAnimation(animationSwipeBegin);
 
                         break;
@@ -463,12 +469,11 @@ public class GlobalTouchService extends Service {
                     case MotionEvent.ACTION_UP:
                         clickUp = true;
                         Log.d("Thumb", "Action Up");
-                        if (clickDown == true)
-                            ivSelector.startAnimation(animationActionUp);
-                        ivThumbIndicatorSwipe.startAnimation(animationSwipeEnd);
-                        ivSelectorSwipe.startAnimation(animationSwipeEnd);
-//                        removeThumbIndicatorSwipe();
-//                        removeSelectorSwipe();
+
+                        if (clickDown == true) {
+                            ivSelectorSwipe.startAnimation(animationSwipeEnd);
+                        }
+
                         resetTimer();
                         break;
 
@@ -707,6 +712,9 @@ public class GlobalTouchService extends Service {
         ivSelector.startAnimation(animationFadeIn);
         ivThumbIndicator.startAnimation(animationFadeIn);
 
+        ivSelector.setImageDrawable(getResources().getDrawable(R.drawable.thumb_02));
+        ivThumbIndicator.setImageDrawable(getResources().getDrawable(R.drawable.thumb_01));
+
         Log.d("####", "Resetting indicator locations");
 
         tX = cX;
@@ -784,7 +792,6 @@ public class GlobalTouchService extends Service {
 
             }
         });
-
         animationActionUp.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
@@ -806,6 +813,25 @@ public class GlobalTouchService extends Service {
         /* animations when swipe begins and ends */
         animationSwipeBegin = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.swipe_begin);
         animationSwipeEnd = AnimationUtils.loadAnimation(getApplicationContext(), R.anim.swipe_end);
+        animationSwipeBegin.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                if (clickUp == true) {
+                    ivSelectorSwipe.startAnimation(animationSwipeEnd);
+                }
+                clickDown = true;
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
         animationSwipeEnd.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
@@ -814,8 +840,35 @@ public class GlobalTouchService extends Service {
 
             @Override
             public void onAnimationEnd(Animation animation) {
+                clickUp = false;
+                clickDown = false;
                 removeSelectorSwipe();
                 removeThumbIndicatorSwipe();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
+        animationCircleFadeOut = new AlphaAnimation(1, 0);
+        animationCircleFadeOut.setDuration(300);
+        animationCircleFadeIn = new AlphaAnimation(0, 1);
+        animationCircleFadeIn.setDuration(300);
+
+        animationCircleFadeOut.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                ivSelector.setImageDrawable(getResources().getDrawable(R.drawable.selector_swipe));
+                ivSelector.startAnimation(animationCircleFadeIn);
+                ivThumbIndicator.setImageDrawable(getResources().getDrawable(R.drawable.thumb_swipe));
+                ivThumbIndicator.startAnimation(animationCircleFadeIn);
             }
 
             @Override
