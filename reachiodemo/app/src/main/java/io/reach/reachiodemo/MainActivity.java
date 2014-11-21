@@ -50,47 +50,6 @@ public class MainActivity extends FragmentActivity {
         mAdapter = new TabsPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(mAdapter);
 
-        actionBar = getActionBar();
-
-        // Specify that tabs should be displayed in the action bar.
-//        actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-//
-//        actionBar.setStackedBackgroundDrawable(new ColorDrawable(Color.parseColor("#243342")));
-//
-//        // Create a tab listener that is called when the user changes tabs.
-//        ActionBar.TabListener tabListener = new ActionBar.TabListener() {
-//            public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-//                viewPager.setCurrentItem(tab.getPosition());
-//                // show the given tab
-//            }
-//
-//            public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-//                // hide the given tab
-//            }
-//
-//            public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
-//                // probably ignore this event
-//            }
-//        };
-//
-//        // Add 2 tabs, specifying the tab's text and TabListener
-//        for (int i = 0; i < 2; i++) {
-//            actionBar.addTab(
-//                    actionBar.newTab()
-//                            .setText("Tab " + (i + 1))
-//                            .setTabListener(tabListener));
-//        }
-//
-//        viewPager.setOnPageChangeListener(
-//                new ViewPager.SimpleOnPageChangeListener() {
-//                    @Override
-//                    public void onPageSelected(int position) {
-//                        // When swiping between pages, select the
-//                        // corresponding tab.
-////                        getActionBar().setSelectedNavigationItem(position);
-//                    }
-//                });
-
         // automatically start service in the beginning if not already running
         if (!isServiceRunning(GlobalTouchService.class)) {
             startService(globalService);
@@ -183,37 +142,6 @@ public class MainActivity extends FragmentActivity {
         // Always unregister when an object no longer should be on the bus.
         BusProvider.getInstance().unregister(this);
     }
-//
-//    @Override
-//    public void onTabSelected(ActionBar.Tab tab, FragmentTransaction ft) {
-//        viewPager.setCurrentItem(tab.getPosition());
-//
-//        viewPager.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-//
-//            @Override
-//            public void onPageSelected(int position) {
-//                actionBar.setSelectedNavigationItem(position);
-//            }
-//
-//            @Override
-//            public void onPageScrolled(int arg0, float arg1, int arg2) {
-//            }
-//
-//            @Override
-//            public void onPageScrollStateChanged(int arg0) {
-//            }
-//        });
-//    }
-//
-//    @Override
-//    public void onTabUnselected(ActionBar.Tab tab, FragmentTransaction ft) {
-//
-//    }
-//
-//    @Override
-//    public void onTabReselected(ActionBar.Tab tab, FragmentTransaction ft) {
-//
-//    }
 
     /* check if service is running */
     private boolean isServiceRunning(Class<?> serviceClass) {
