@@ -1,4 +1,4 @@
-package io.reach.reachiodemo;
+package io.reach.reachiodemo.ui;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -18,6 +18,9 @@ import android.widget.Toast;
 
 import com.squareup.otto.Subscribe;
 
+import io.reach.reachiodemo.App;
+import io.reach.reachiodemo.GlobalTouchService;
+import io.reach.reachiodemo.R;
 import io.reach.reachiodemo.bus.BusProvider;
 import io.reach.reachiodemo.bus.RegionMotionEvent;
 import io.reach.reachiodemo.ui.TabsPagerAdapter;

@@ -53,7 +53,15 @@ public class SecondFragment extends android.support.v4.app.Fragment {
                 "Colombia",
                 "Belgium",
                 "France",
-                "Costa Rica"
+                "Costa Rica",
+                "Chile",
+                "Mexico",
+                "Switzerland",
+                "Uruguay",
+                "Greece",
+                "Algeria",
+                "United States",
+                "Nigeria"
         };
 
         //Create your List object for the ArrayAdapter

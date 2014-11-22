@@ -2,6 +2,7 @@ package io.reach.reachiodemo;
 
 import android.app.Service;
 import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -132,7 +133,7 @@ public class GlobalTouchService extends Service {
         setupSelector();
         setupThumbIndicator();
 
-        setupAnchorDropRegion();
+//        setupAnchorDropRegion();
 
         setupAnchor();
     }
@@ -310,11 +311,15 @@ public class GlobalTouchService extends Service {
         Log.d("####", "LONG CLICK");
         removeSelector();
         removeThumbIndicator();
-        showAnchorDropRegion();
 
-        ClipData data = ClipData.newPlainText("", "");
+        ClipData.Item item = new ClipData.Item((String) view.getTag());
+        ClipData data = new ClipData((String) view.getTag(),
+                new String[]{ClipDescription.MIMETYPE_TEXT_PLAIN}, item);
+
         View.DragShadowBuilder shadowBuilder = new View.DragShadowBuilder(view);
         view.startDrag(data, shadowBuilder, null, 0);
+        setupAnchorDropRegion();
+        showAnchorDropRegion();
     }
 
 
@@ -385,6 +390,8 @@ public class GlobalTouchService extends Service {
                         break;
 
                     case DragEvent.ACTION_DRAG_ENDED:
+                        Log.d("####", "DRAG ENDED");
+                        break;
 
                     default:
                         break;

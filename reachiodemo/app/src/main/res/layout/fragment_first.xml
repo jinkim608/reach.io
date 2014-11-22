@@ -6,6 +6,8 @@
 
     <SeekBar
         android:layout_margin="10dp"
+        android:id="@+id/seekbar"
+        android:progress="25"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:progressDrawable="@drawable/apptheme_scrubber_progress_horizontal_holo_light"
@@ -38,7 +40,7 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="25dp"
+        android:layout_margin="40dp"
         android:scaleType="fitCenter"
         android:src="@drawable/apple" />
 
