@@ -2,8 +2,10 @@ Reach.io:
 ========
 ###### Reaching further in one-handed touch interaction
 
-November, 2014
+11/25/2014
+
 Jinhyun Kim
+
 Muzi Li
 
 ## 0. Introduction
@@ -40,3 +42,11 @@ There are 3 main components in the UI system: Anchor, Touch Indicator, and Selec
 #### 2.1. Service
 
 #### 2.2. EventBus
+
+## 3. Limitation
+
+#### 3.1. INJECT_EVENT with System Permission
+
+## 4. Future Work
+
+#### 4.1. More Feedback for User Interaction
