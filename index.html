@@ -5,9 +5,10 @@
 		<title>Reach.io</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<!-- Bootstrap -->
-		<link href="/webpage/css/bootstrap.min.css" rel="stylesheet">
-		<link href="/webpage/css/bootstrap-theme.min.css" rel="stylesheet">
-		<link href="/webpage/css/main.css" rel="stylesheet">
+		<link href="https://cdn.rawgit.com/jinkim608/reach.io/gh-pages/webpage/css/bootstrap.min.css" rel="stylesheet">
+		<link href="https://cdn.rawgit.com/jinkim608/reach.io/gh-pages/webpage/css/bootstrap-theme.min.css" rel="stylesheet">
+		<!-- <link href="/webpage/css/main.css" rel="stylesheet"> -->
+		<link href="https://cdn.rawgit.com/jinkim608/reach.io/gh-pages/webpage/css/main.css" rel="stylesheet">
 
 	</head>
 	
@@ -93,6 +94,27 @@
 
 				<div id="implementation">
 					<h1>Implementation</h1>
+
+					<p>Reach.io demo application is built for Android, compatible with API 15 (4.0.3 Ice Cream Sandwich) and above, on Android Studio with Gradle.</p>
+
+						<h2>Architecture</h2>
+
+						<p>Diagram below describes the basic architecture of the project.</p>
+
+						<img class="img-responsive" src='webpage/img/architecture-diagram.png' style="width: 600px" alt='test'/>
+
+						<p>The three indicators are added to WindowManager from GlobalTouchService.</p>
+
+						<p>The event bus forwards onTouch events from the service to the main activity to simulate the touch events accordingly.</p>
+
+						<h2>Event Bus</h2>
+
+						<p>Otto event bus from Square is used for the communication between a service and an activity.</p>
+
+						<h2>Global Touch Service</h2>
+
+						<a href='https://github.com/kpbird/android-global-touchevent'>GlobalTouchService</a> code snippet is used as a starting point and our project-specific code was added to implement a control that can run outside the demo application context (display indicators while the demo app is put in background or killed).
+
 				</div>
 
 				<div id="futurework">
