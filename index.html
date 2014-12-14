@@ -66,10 +66,10 @@
 
 				<h1 style="padding-top: 10px">Reach.io</h1>
 				<p>Extend the reach area of the thumb for one-handed mobile device touch interaction</p>
-				<br><br>
+				<br>
 				Jinhyun Kim<br>
 				Muzi Li<br>
-				<br><br>
+				<br>
 				Updated 12/11/2014
 
 				<div id="introduction">
@@ -115,17 +115,52 @@
 
 						<a href='https://github.com/kpbird/android-global-touchevent'>GlobalTouchService</a> code snippet is used as a starting point and our project-specific code was added to implement a control that can run outside the demo application context (display indicators while the demo app is put in background or killed).
 
+						<h2>Calculating Selector Location</h2>
+
+						<p>The selector location is determined by the following steps:</p>
+						<ul>
+						  <li>Calculate a vector from the anchor point to the current touch location</li>
+						  <li>Multiply the calculated vector by the system defined (movement rate - 1)</li>
+						  <li>Add the above to the current touch location and display the selector at this location.<br><br>
+						  ex) movement rate = 2.0<br>
+						    The anchor point is at the bottom left<br>
+						    The touch location is at the center<br>
+						    Then, the selector will be placed at the top right</li>
+						</ul>
+
 				</div>
 
 				<div id="futurework">
-					<h1>Future Work</h1>
+					<h1>Challenges and Future Work</h1>
+
+					Here are some challenges we faced during the development that need additional work.
+
+					<h2>Simulating Touch Events Globally</h2>
+
+					Adding UI components on WindowManager from a Service displays our indicator components outside the application context. However, simulating touch events outside our application was not possible without Android system level permission which requires additional steps (possibly rooting the device).
+
+					<h2>Ambiguity Between Keep Moving and Swipe Gesture</h2>
+
+					Currently, the system changes its mode from ‘placing the selector’ to ‘accept touch gesture’ when a finger is lifted from the first swipe motion from the anchor point. There needs to be a way to adjust the selector location after an initial placement other than starting fresh from the anchor point.
+
+					<h2>Snapping</h2>
+
+					There is also a possible interaction where a selector automatically jumps to a nearby UI component, called ‘snapping’. This will require a way to parse the information from inflated layout.
+
+					<h2>More Feedback</h2>
+
+					The project currently only implements visual feedback, such as animation, upon a change of system status. There is a potential use of haptic or vibration feedback for different action happening on the system.
+
+					<h2>Responsiveness</h2>
+
+					So far, the project was tested for smooth interaction on Samsung Galaxy S4, Nexus 5, and Nexus 7 devices, with relatively recent hardware specs. Any additional heavy calculations on touch location or more robust animations should be tested for efficiency or smooth graphics.
 				</div>
+				<br>
 
 			</div>
 
 		</div>
 
-		
 	</div>
 
 	
